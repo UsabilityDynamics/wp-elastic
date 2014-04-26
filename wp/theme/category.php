@@ -1,53 +1,53 @@
 <?php
 namespace elasticsearch;
 
-class Category extends AbstractArchive{
-	function facets($wp_query, $args){
-		if(!is_category()){
-			return;
-		}
+class Category extends AbstractArchive {
+  function facets( $wp_query, $args ) {
+    if( !is_category() ) {
+      return;
+    }
 
-		$enabled = Config::option('enable_categories', array());
-		$all = Config::option('enable_all_categories', false);
+    $enabled = Config::option( 'enable_categories', array() );
+    $all     = Config::option( 'enable_all_categories', false );
 
-		$cats = array();
+    $cats = array();
 
-		if(isset($wp_query->query_vars['category_name']) && !empty($wp_query->query_vars['category_name'])){
-			$cat = get_category_by_slug($wp_query->query_vars['category_name']);
+    if( isset( $wp_query->query_vars[ 'category_name' ] ) && !empty( $wp_query->query_vars[ 'category_name' ] ) ) {
+      $cat = get_category_by_slug( $wp_query->query_vars[ 'category_name' ] );
 
-			if(!$all && !in_array($cat->term_id, $enabled)){
-				return;
-			}
+      if( !$all && !in_array( $cat->term_id, $enabled ) ) {
+        return;
+      }
 
-			$cats[] = $cat;
-		}else if(isset($wp_query->query_vars['cat'])){
-			$catids = explode(',', $wp_query->query_vars['cat']);
+      $cats[ ] = $cat;
+    } else if( isset( $wp_query->query_vars[ 'cat' ] ) ) {
+      $catids = explode( ',', $wp_query->query_vars[ 'cat' ] );
 
-			foreach($catids as $id){
-				if(!$all && !in_array($id, $enabled)){
-					return;
-				}
+      foreach( $catids as $id ) {
+        if( !$all && !in_array( $id, $enabled ) ) {
+          return;
+        }
 
-				$cats[] = get_category($id);
-			}
-		}
-		
-		if(empty($cats)){
-			return;
-		}
+        $cats[ ] = get_category( $id );
+      }
+    }
 
-		if(!isset($args['category'])){
-			if(count($cats) > 1){
-				foreach($cats as $cat){
-					$args['category']['or'][] = $cat->slug;
-				}
-			}else{
-				$args['category']['and'][] = $cats[0]->slug;
-			}
-		}
+    if( empty( $cats ) ) {
+      return;
+    }
 
-		return $args;
-	}
+    if( !isset( $args[ 'category' ] ) ) {
+      if( count( $cats ) > 1 ) {
+        foreach( $cats as $cat ) {
+          $args[ 'category' ][ 'or' ][ ] = $cat->slug;
+        }
+      } else {
+        $args[ 'category' ][ 'and' ][ ] = $cats[ 0 ]->slug;
+      }
+    }
+
+    return $args;
+  }
 }
 
 new Category();

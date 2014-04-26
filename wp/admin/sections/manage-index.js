@@ -1,54 +1,59 @@
-(function($){
-	function done(failed){
-		$("#reindex").removeAttr('disabled').addClass('complete');
-		$('#progress').hide();
+(function( $ ) {
+  function done( failed ) {
+    $( "#reindex" ).removeAttr( 'disabled' ).addClass( 'complete' );
+    $( '#progress' ).hide();
 
-		if(failed){
-			$('#error').show().find('.msg').text(failed);
-		}else{
-			$('#complete').show();
-		}
-	}
+    if( failed ) {
+      $( '#error' ).show().find( '.msg' ).text( failed );
+    } else {
+      $( '#complete' ).show();
+    }
+  }
 
-	function index(page){
-		$.ajax({
-			url: window.indexing.ajaxurl,
-			type: 'POST',
-			data: {
-				'action': 'esreindex',
-				'page': page
-			},
-			error: function(xhr){
-				done(xhr.responseText);
-			},
-			success: function(indexed){
-				var indexed = parseInt(indexed);
+  function index( page ) {
+    $.ajax( {
+      url: window.indexing.ajaxurl,
+      type: 'POST',
+      data: {
+        'action': 'esreindex',
+        'page': page
+      },
+      error: function( xhr ) {
+        done( xhr.responseText );
+      },
+      success: function( indexed ) {
 
-				var total = $('.finished');
+        if( 'object' === typeof indexed && !indexed.ok ) {
+          return done( indexed.message );
+        }
 
-				total.text(parseInt(total.text()) + indexed);
+        indexed = parseInt( indexed );
 
-				if(indexed == window.indexing.perpage){
-					index(page + 1);
-				}else{
-					done();
-				}
-			}
-		});
-	}
+        var total = $( '.finished' );
 
-	$(function(){
-		$('.total').text(window.indexing.total);
+        total.text( parseInt( total.text() ) + indexed );
 
-		$("#reindex").click(function(){
-			$(this).attr('disabled', 'disabled');
-			$('#progress').show();
-			$('#complete').hide();
-			$('#error').hide();
+        if( indexed == window.indexing.perpage ) {
+          index( page + 1 );
+        } else {
+          done();
+        }
+      }
+    } );
+  }
 
-			index(1);
+  $( function() {
+    $( '.total' ).text( window.indexing.total );
 
-			return false;
-		});
-	});
-})(jQuery);
+    $( "#reindex" ).click( function() {
+      $( this ).attr( 'disabled', 'disabled' );
+      $( '#progress' ).show();
+      $( '#complete' ).hide();
+      $( '#error' ).hide();
+
+      index( 1 );
+
+      return false;
+    } );
+  } );
+})( jQuery );

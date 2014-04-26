@@ -4,13 +4,20 @@ namespace elasticsearch;
 add_action( 'nhp-opts-options-validate-elasticsearch', function ( $new, $current ) {
   global $NHP_Options;
 
-  if( $new[ 'server_url' ] == $current[ 'server_url' ] && $new[ 'server_index' ] == $current[ 'server_index' ] ) {
+  if( $new[ 'server_url' ] == $current[ 'server_url' ] && $new[ 'server_auth' ] == $current[ 'server_auth' ] && $new[ 'server_index' ] == $current[ 'server_index' ] ) {
     return;
   }
 
   if( $new[ 'server_url' ] ) {
+
+    $_server_url = trailingslashit( $new[ 'server_url' ] );
+
+    if( $new[ 'server_auth' ] ) {
+      $_server_url = $new[ 'server_auth' ] . '@' . $_server_url;
+    }
+
     $client = new \Elastica\Client( array(
-      'url' => $new[ 'server_url' ]
+      'url' => $_server_url
     ) );
 
     try {
@@ -41,12 +48,19 @@ $sections[ 'server' ] = array(
       'type'     => 'text',
       'title'    => 'Server URL',
       'sub_desc' => 'If your search provider has given you a connection URL, use that instead of filling out server information.',
-      'desc'     => 'It must include the trailing slash "/"'
+      'desc'     => 'URL or hostname of server.'
+    ),
+    'server_auth'          => array(
+      'id'    => 'server_auth',
+      'type'  => 'text',
+      'title' => 'Basic Authentication',
+      'desc'  => 'For Basic Authentication enter username:password.'
     ),
     'server_index'         => array(
       'id'    => 'server_index',
       'type'  => 'text',
-      'title' => 'Index Name'
+      'title' => 'Index Name',
+      'desc'  => 'If not specified, site domain will be used.'
     ),
     'server_options'       => array(
       'id'       => 'server_options',

@@ -1,175 +1,176 @@
 <?php
+
 class FactingSelectedWidget extends \WP_Widget {
 
-	function __construct() {
-		// Instantiate the parent object
-		parent::__construct( false, 'Faceting: Selected' );
-	}
+  function __construct() {
+    // Instantiate the parent object
+    parent::__construct( false, 'Faceting: Selected' );
+  }
 
-	function isremoveable($slug){
-		global $wp_query;
+  function isremoveable( $slug ) {
+    global $wp_query;
 
-		$istag = isset($wp_query->query_vars['tag']) && $slug == $wp_query->query_vars['tag'];
-		$iscat = isset($wp_query->query_vars['category_name']) && $slug == $wp_query->query_vars['category_name'];
-		$istax = is_tax() && isset($wp_query->queried_object) && $slug == $wp_query->queried_object->slug;
-		$isarchive = is_archive() && isset($wp_query->query_vars['post_type']) && $slug == $wp_query->query_vars['post_type'];
-		
-		return !($istag || $iscat || $istax || $isarchive);
-	}
+    $istag     = isset( $wp_query->query_vars[ 'tag' ] ) && $slug == $wp_query->query_vars[ 'tag' ];
+    $iscat     = isset( $wp_query->query_vars[ 'category_name' ] ) && $slug == $wp_query->query_vars[ 'category_name' ];
+    $istax     = is_tax() && isset( $wp_query->queried_object ) && $slug == $wp_query->queried_object->slug;
+    $isarchive = is_archive() && isset( $wp_query->query_vars[ 'post_type' ] ) && $slug == $wp_query->query_vars[ 'post_type' ];
 
-	function widget( $args, $instance ) {
-		global $wp_query;
+    return !( $istag || $iscat || $istax || $isarchive );
+  }
 
-		$facets = elasticsearch\Faceting::all();
+  function widget( $args, $instance ) {
+    global $wp_query;
 
-		$async = isset($instance['async']) && $instance['async'];
-		$split = isset($instance['splitSpaces']) && $instance['splitSpaces'];
+    $facets = elasticsearch\Faceting::all();
 
-		if($async){
-			wp_enqueue_script("jquery");
-			wp_enqueue_script('elasticsearch', plugins_url('/js/ajax.js', __FILE__), array( 'jquery' ));
+    $async = isset( $instance[ 'async' ] ) && $instance[ 'async' ];
+    $split = isset( $instance[ 'splitSpaces' ] ) && $instance[ 'splitSpaces' ];
 
-			wp_localize_script( 'elasticsearch', 'esselected', array(
-				'showEmpty' => isset($instance['showEmpty']) ? 1 : 0
-			));
-		}
+    if( $async ) {
+      wp_enqueue_script( "jquery" );
+      wp_enqueue_script( 'elasticsearch', plugins_url( '/js/ajax.js', __FILE__ ), array( 'jquery' ) );
 
-		$url = null;
+      wp_localize_script( 'elasticsearch', 'esselected', array(
+        'showEmpty' => isset( $instance[ 'showEmpty' ] ) ? 1 : 0
+      ) );
+    }
 
-		if(is_category() || is_tax()){
-			$url = get_term_link($wp_query->queried_object);
-		}elseif(is_tag()){
-			$url = get_tag_link($wp_query->queried_object->term_id);				
-		}elseif(is_archive()){
-			$url = get_post_type_archive_link($wp_query->queried_object->query_var);
-		}elseif(is_search()){
-			$url = home_url('/');
-		}
+    $url = null;
 
-		if($url == null){
-			return null;
-		}
+    if( is_category() || is_tax() ) {
+      $url = get_term_link( $wp_query->queried_object );
+    } elseif( is_tag() ) {
+      $url = get_tag_link( $wp_query->queried_object->term_id );
+    } elseif( is_archive() ) {
+      $url = get_post_type_archive_link( $wp_query->queried_object->query_var );
+    } elseif( is_search() ) {
+      $url = home_url( '/' );
+    }
 
-		if($async){
-			echo '<aside id="facet-selected" class="widget facets facets-selected">';
+    if( $url == null ) {
+      return null;
+    }
 
-			echo '<h3 class="widget-title"><span class="widget-title-inner">Your Selections</span></h3>';
+    if( $async ) {
+      echo '<aside id="facet-selected" class="widget facets facets-selected">';
 
-			if($async){
-				echo '<span class="clear"><a href="#" class="clear-inner esclear">Clear All</a></span>';
-			}
-			
-			echo '<ul>';
+      echo '<h3 class="widget-title"><span class="widget-title-inner">Your Selections</span></h3>';
 
-			if(is_search()){
-				if($split && strpos($wp_query->query_vars['s'], ' ') !== false){
-					$split = explode(' ', trim($wp_query->query_vars['s']));
+      if( $async ) {
+        echo '<span class="clear"><a href="#" class="clear-inner esclear">Clear All</a></span>';
+      }
 
-					foreach($split as $term){
-						$term = trim($term);
+      echo '<ul>';
 
-						if($term){
-							echo '<li class="term removable" data-term="' . $term . '"><a href="#search-term-'. $term . '">Search: ' . $term . '</a></li>';
-						}
-					}
-				}else{
-					echo '<li data-term="' . $term . '">Search: ' . $wp_query->query_vars['s'] . '</li>';
-				}
-			}
+      if( is_search() ) {
+        if( $split && strpos( $wp_query->query_vars[ 's' ], ' ' ) !== false ) {
+          $split = explode( ' ', trim( $wp_query->query_vars[ 's' ] ) );
 
-			foreach($facets as $type => $facet){
-				$name = $type;
+          foreach( $split as $term ) {
+            $term = trim( $term );
 
-				if(taxonomy_exists($type)){
-					$name = get_taxonomy($type)->labels->singular_name;
-				}
+            if( $term ) {
+              echo '<li class="term removable" data-term="' . $term . '"><a href="#search-term-' . $term . '">Search: ' . $term . '</a></li>';
+            }
+          }
+        } else {
+          echo '<li data-term="' . $term . '">Search: ' . $wp_query->query_vars[ 's' ] . '</li>';
+        }
+      }
 
-				if(isset($facet['available'])){
-					foreach($facet['available'] as $option){
-						$isremovable = $this->isremoveable($option['slug']);
+      foreach( $facets as $type => $facet ) {
+        $name = $type;
 
-						echo '<li id="facet-' . $type . '-' . $option['slug'] . '-selected"';
-						
-						if($isremovable){
-							echo ' style="display:none" class="facet-item removable">';
-							echo '<a href="#facet-' . $type . '-' . $option['slug'] . '">' . ($name == 'post_type' ? 'Content Type' : $name) . ': ' . $option['name'] . '</a>';
-						}else{
-							echo 'class="facet-item">' . ($name == 'post_type' ? 'Content Type' : $name) . ': ' . $option['name'];
-						}
+        if( taxonomy_exists( $type ) ) {
+          $name = get_taxonomy( $type )->labels->singular_name;
+        }
 
-						echo '</li>';
-					}
-				}
-			}
+        if( isset( $facet[ 'available' ] ) ) {
+          foreach( $facet[ 'available' ] as $option ) {
+            $isremovable = $this->isremoveable( $option[ 'slug' ] );
 
-			echo '</ul>';
+            echo '<li id="facet-' . $type . '-' . $option[ 'slug' ] . '-selected"';
 
-			echo '</aside>';
-		}else{
-			foreach($facets as $type => $facet){
-				if(count($facet['selected']) > 0){
-					$name = $type;
+            if( $isremovable ) {
+              echo ' style="display:none" class="facet-item removable">';
+              echo '<a href="#facet-' . $type . '-' . $option[ 'slug' ] . '">' . ( $name == 'post_type' ? 'Content Type' : $name ) . ': ' . $option[ 'name' ] . '</a>';
+            } else {
+              echo 'class="facet-item">' . ( $name == 'post_type' ? 'Content Type' : $name ) . ': ' . $option[ 'name' ];
+            }
 
-					if(taxonomy_exists($type)){
-						$name = get_taxonomy($type)->label;
-					}
+            echo '</li>';
+          }
+        }
+      }
 
-					echo '<aside id="facet-' . $type . '-selected" class="widget facets facets-selected">';
+      echo '</ul>';
 
-					echo '<h3 class="widget-title"><span class="widget-title-inner">' . $name . '</span></h3>';
+      echo '</aside>';
+    } else {
+      foreach( $facets as $type => $facet ) {
+        if( count( $facet[ 'selected' ] ) > 0 ) {
+          $name = $type;
 
-					echo '<ul>';
+          if( taxonomy_exists( $type ) ) {
+            $name = get_taxonomy( $type )->label;
+          }
 
-					foreach($facet['selected'] as $option){
-						$url = elasticsearch\Faceting::urlRemove($url, $type, $option['slug']);
+          echo '<aside id="facet-' . $type . '-selected" class="widget facets facets-selected">';
 
-						$isremovable = $this->isremoveable($option['slug']);
+          echo '<h3 class="widget-title"><span class="widget-title-inner">' . $name . '</span></h3>';
 
-						echo '<li id="facet-' . $type . '-' . $option['slug'] . '" class="facet-item">';
+          echo '<ul>';
 
-						if($isremovable){
-							echo '<a href="' . $url . '">' . $option['name'] . '</a>';
-						}else{
-							echo $name . ':' . $option['name'];
-						}
+          foreach( $facet[ 'selected' ] as $option ) {
+            $url = elasticsearch\Faceting::urlRemove( $url, $type, $option[ 'slug' ] );
 
-						echo '</li>';
-					}
+            $isremovable = $this->isremoveable( $option[ 'slug' ] );
 
-					echo '</ul>';
+            echo '<li id="facet-' . $type . '-' . $option[ 'slug' ] . '" class="facet-item">';
 
-					echo '</aside>';
-				}
-			}
-		}
-	}
+            if( $isremovable ) {
+              echo '<a href="' . $url . '">' . $option[ 'name' ] . '</a>';
+            } else {
+              echo $name . ':' . $option[ 'name' ];
+            }
 
-	function update( $new_instance, $old_instance ) {
-		return $new_instance;
-	}
+            echo '</li>';
+          }
 
-	function form( $instance ) {
-		?>
-			<p>  
-				<input class="checkbox" type="checkbox" <?php checked( $instance['async'], true ); ?>
-					id="<?php echo $this->get_field_id( 'async' ); ?>" name="<?php echo $this->get_field_name( 'async' ); ?>" value="1" />   
+          echo '</ul>';
+
+          echo '</aside>';
+        }
+      }
+    }
+  }
+
+  function update( $new_instance, $old_instance ) {
+    return $new_instance;
+  }
+
+  function form( $instance ) {
+    ?>
+    <p>
+				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'async' ], true ); ?>
+          id="<?php echo $this->get_field_id( 'async' ); ?>" name="<?php echo $this->get_field_name( 'async' ); ?>" value="1"/>
 				<label for="<?php echo $this->get_field_id( 'async' ); ?>">Update selected items asynchronously (requires faceting options widget)</label>  
-			</p>  
-			<p>  
-				<input class="checkbox" type="checkbox" <?php checked( $instance['showEmpty'], true ); ?>
-					id="<?php echo $this->get_field_id( 'showEmpty' ); ?>" name="<?php echo $this->get_field_name( 'showEmpty' ); ?>" value="1" />   
+			</p>
+    <p>
+				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'showEmpty' ], true ); ?>
+          id="<?php echo $this->get_field_id( 'showEmpty' ); ?>" name="<?php echo $this->get_field_name( 'showEmpty' ); ?>" value="1"/>
 				<label for="<?php echo $this->get_field_id( 'showEmpty' ); ?>">Show empty message and hide available options when all facets are selected.</label>  
 			</p>
-			<p>  
-				<input class="checkbox" type="checkbox" <?php checked( $instance['splitSpaces'], true ); ?>
-					id="<?php echo $this->get_field_id( 'splitSpaces' ); ?>" name="<?php echo $this->get_field_name( 'splitSpaces' ); ?>" value="1" />   
+    <p>
+				<input class="checkbox" type="checkbox" <?php checked( $instance[ 'splitSpaces' ], true ); ?>
+          id="<?php echo $this->get_field_id( 'splitSpaces' ); ?>" name="<?php echo $this->get_field_name( 'splitSpaces' ); ?>" value="1"/>
 				<label for="<?php echo $this->get_field_id( 'splitSpaces' ); ?>">Split search query by spaces so user can remove words individually.</label>  
 			</p>
-		<?php
-	}
+  <?php
+  }
 }
 
-add_action( 'widgets_init', function() {
-	register_widget('FactingSelectedWidget');
-});
+add_action( 'widgets_init', function () {
+  register_widget( 'FactingSelectedWidget' );
+} );
 ?>

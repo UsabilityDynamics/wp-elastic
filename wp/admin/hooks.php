@@ -3,16 +3,17 @@ namespace elasticsearch;
 
 class Hooks {
   function __construct() {
-    add_action( 'save_post',    array( &$this, 'save_post' ) );
-    add_action( 'delete_post',  array( &$this, 'delete_post' ) );
-    add_action( 'trash_post',   array( &$this, 'delete_post' ) );
-    add_action( 'edit_term',    array( &$this, 'edit_term' ) );
+    add_action( 'save_post', array( &$this, 'save_post' ) );
+    add_action( 'delete_post', array( &$this, 'delete_post' ) );
+    add_action( 'trash_post', array( &$this, 'delete_post' ) );
+    add_action( 'edit_term', array( &$this, 'edit_term' ) );
   }
 
   /**
    * Index Terms
    *
    * @author potanin@UD
+   *
    * @param $term_id
    * @param $tt_id
    * @param $taxonomy
