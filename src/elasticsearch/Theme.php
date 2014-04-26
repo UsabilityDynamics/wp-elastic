@@ -1,6 +1,5 @@
 <?php
 namespace elasticsearch;
-
 /**
 * This theme class provides utilities for introducing advanced functionality (such as ajax faceting) to your theme.
 *
@@ -51,4 +50,3 @@ class Theme{
 		}
 	}
 }
-?>
