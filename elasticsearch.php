@@ -3,7 +3,7 @@
  * Plugin Name: WP-Elastic
  * Plugin URI: http://wordpress.org/extend/plugins/fantastic-elasticsearch/
  * Description: Improve wordpress search performance and accuracy by leveraging an ElasticSearch server.
- * Version: 2.3.0
+ * Version: 2.4.0
  * Author: Usability Dynamics, Inc.
  * Author URI: http://www.linkedin.com/in/parisholley
  * Author Email: mail@parisholley.com

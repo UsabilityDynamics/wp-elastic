@@ -1,7 +1,7 @@
 {
   "name": "UsabilityDynamics/wp-elastic",
   "description": "Improve WordPress search performance/accuracy and enable faceted search by leveraging an ElasticSearch server.",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "keywords": [
     "elasticsearch",
     "wordpress",
