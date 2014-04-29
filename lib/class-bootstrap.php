@@ -65,13 +65,11 @@ namespace wpElastic {
           'data'  => json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ))
         ));
 
-        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'activate' ) );
-        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'deactivate' ) );
-
         // Set Computed Options.
         $this->set( get_file_data( ( dirname( __DIR__ ) . '/wp-elastic.php' ), array(
           'name' => 'Plugin Name',
           'uri' => 'Plugin URI',
+          'description' => 'Description',
           'version' => 'Version',
           'domain' => 'Text Domain'
         )));
@@ -106,6 +104,10 @@ namespace wpElastic {
 
         // Utility Actions.
         add_filter( 'plugin_action_links_' . $this->basename, array( 'wpElastic\Bootstrap', 'action_links' ), -10 );
+
+        // Upgrade Control.
+        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'activate' ) );
+        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'deactivate' ) );
 
       }
 
@@ -191,23 +193,29 @@ namespace wpElastic {
 
         // Site Only.
         if( current_filter() === 'admin_menu' ) {
-          $this->_pages[ 'services' ] = add_options_page( __( 'Services', $this->get( 'domain' ) ), __( 'Services', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_interface' ) );
+          $this->_pages[ 'services' ] = add_options_page(   __( 'Services', $this->get( 'domain' ) ), __( 'Services', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_template' ) );
+          $this->_pages[ 'tools' ]    = add_dashboard_page( __( 'Elastic', $this->get( 'domain' ) ),  __( 'Elastic', $this->get( 'domain' ) ),  'manage_options', 'wp-elastic-tools',   array( $this, 'admin_template' ) );
         }
 
         // Network Only.
         if( current_filter() === 'network_admin_menu' ) {
-          $this->_pages[ 'services' ] = add_options_page( __( 'Services', $this->get( 'domain' ) ), __( 'Services', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_interface' ) );
-          $this->_pages[ 'reports' ] = add_submenu_page( 'index.php', __( 'Reports', $this->get( 'domain' ) ), __( 'Reports', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-reports', array( $this, 'admin_interface' ) );
+          $this->_pages[ 'services' ] = add_options_page( __( 'Services', $this->get( 'domain' ) ), __( 'Services', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_template' ) );
+          $this->_pages[ 'reports' ]  = add_submenu_page( 'index.php', __( 'Reports', $this->get( 'domain' ) ), __( 'Reports', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-reports', array( $this, 'admin_template' ) );
         }
 
       }
 
       /**
+       * Load Admin Template.
        *
        */
-      public function admin_interface() {
+      public function admin_template() {
 
-        echo file_get_contents( $this->path . 'static/views/settings.html' );
+        $_path = $this->path . 'static/views/' . str_replace( array( 'dashboard_page_', 'plugins_page_', 'settings_page_', 'tools_page_'  ), '', get_current_screen()->id ) . '.php';
+
+        if( file_exists( $_path ) ) {
+          include( $_path );
+        }
 
       }
 
@@ -218,23 +226,15 @@ namespace wpElastic {
       public function admin_scripts() {
 
         // Register Libraies and Styles..
-        wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), true  );
-        wp_register_script( 'wp-elastic/admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic/mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_enqueue_style( 'wp-elastic',          $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
+        wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false  );
+        wp_enqueue_style( 'wp-elastic', $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
 
-        if( get_current_screen()->id === $this->_pages[ 'services' ] ) {
-          wp_enqueue_script( 'udx-requires' );
-          // wp_enqueue_script( 'wp-elastic.admin' );
-          wp_enqueue_style( 'wp-elastic' );
-        }
+        //wp_register_script( 'wp-elastic.admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
+        //wp_register_script( 'wp-elastic.mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
+        //wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
 
-        if( get_current_screen()->id === $this->_pages[ 'mapping' ] ) {
+        if( in_array( get_current_screen()->id, $this->_pages ) ) {
           wp_enqueue_script( 'udx-requires' );
-          // wp_enqueue_script( 'wp-elastic' );
-          // wp_enqueue_script( 'wp-elastic.mapping' );
-          // wp_enqueue_style( 'wp-elastic' );
         }
 
         // wp_localize_script( 'udx-requires', 'wpElastic', $this->get() );
