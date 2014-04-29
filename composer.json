@@ -38,8 +38,8 @@
       "vendor/plugins/{$name}": [
         "type:wordpress-plugin"
       ],
-      "vendor/extensions/{$name}": [
-        "type:wordpress-extensions"
+      "vendor/modules/{$name}": [
+        "type:wordpress-module"
       ],
       "vendor/themes/{$name}": [
         "type:wordpress-theme"
@@ -54,7 +54,12 @@
     ]
   },
   "require": {
+    "php": ">=5.3",
+    "composer/installers": "~1.0",
     "usabilitydynamics/lib-settings": "master",
+    "usabilitydynamics/lib-utility": "master",
+    "usabilitydynamics/lib-api": "master",
+    "usabilitydynamics/lib-rpc": "master",
     "usabilitydynamics/lib-ui": "master"
   },
   "scripts": {

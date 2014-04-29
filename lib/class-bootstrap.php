@@ -142,19 +142,19 @@ namespace wpElastic {
         add_action( 'customize_preview_init',     array( $this, 'customize_preview_init' ), 10 );
 
         // Synchroniation Filters.
-        add_action( 'deleted_user',               array( $this, 'deleted_user' ) );
-        add_action( 'profile_update',             array( $this, 'user_update' ) );
-        add_action( 'user_register',              array( $this, 'user_update' ) );
+        // add_action( 'deleted_user',               array( $this, 'deleted_user' ) );
+        // add_action( 'profile_update',             array( $this, 'user_update' ) );
+        // add_action( 'user_register',              array( $this, 'user_update' ) );
 
-        add_action( 'added_user_meta',            array( $this, 'user_meta_change' ) );
-        add_action( 'updated_user_meta',          array( $this, 'user_meta_change' ) );
-        add_action( 'deleted_user_meta',          array( $this, 'user_meta_change' ) );
+        // add_action( 'added_user_meta',            array( $this, 'user_meta_change' ) );
+        // add_action( 'updated_user_meta',          array( $this, 'user_meta_change' ) );
+        // add_action( 'deleted_user_meta',          array( $this, 'user_meta_change' ) );
 
-        add_action( 'save_post',                  array( $this, 'save_post' ) );
-        add_action( 'delete_post',                array( $this, 'delete_post' ) );
-        add_action( 'trash_post',                 array( $this, 'delete_post' ) );
-        add_action( 'trash_post',                 array( $this, 'delete_post' ) );
-        add_action( 'edit_term',                  array( $this, 'edit_term' ), 10, 3 );
+        // add_action( 'save_post',                  array( $this, 'save_post' ) );
+        // add_action( 'delete_post',                array( $this, 'delete_post' ) );
+        // add_action( 'trash_post',                 array( $this, 'delete_post' ) );
+        // add_action( 'trash_post',                 array( $this, 'delete_post' ) );
+        // add_action( 'edit_term',                  array( $this, 'edit_term' ), 10, 3 );
 
         // Utility Actions.
         add_filter( 'plugin_action_links_' . $this->basename, array( 'wpElastic\Bootstrap', 'action_links' ), -10 );
@@ -263,8 +263,8 @@ namespace wpElastic {
        *
        */
       public function customize_live_preview() {
-        wp_enqueue_script( 'wp-elastic.customizer', $this->url . 'static/scripts/wp-elastic.customizer.js', array( 'jquery', 'customize-preview' ), $this->get( 'version' ), true );
-        wp_localize_script( 'wp-elastic.customizer', 'wp_elastic_customizer', $this->get() );
+        // wp_enqueue_script( 'wp-elastic.customizer', $this->url . 'static/scripts/wp-elastic.customizer.js', array( 'jquery', 'customize-preview' ), $this->get( 'version' ), true );
+        // wp_localize_script( 'wp-elastic.customizer', 'wp_elastic_customizer', $this->get() );
       }
 
       /**
