@@ -1,9 +1,9 @@
 <?php
 namespace wpElastic\Document {
 
-  if( !class_exists( 'wpElastic\Document\Option' ) ) {
+  if( !class_exists( 'wpElastic\Document\Comment' ) ) {
 
-    class Option extends Document {
+    class Comment extends Document {
 
       function __construct() {
 
