@@ -1,6 +1,8 @@
 <?php
 namespace wpElastic {
 
+  use \UsabilityDynamics\Settings;
+
   if( !class_exists( 'wpElastic\Bootstrap' ) ) {
 
     if( !class_exists( 'wpElastic\Utility' ) ) {
@@ -12,7 +14,7 @@ namespace wpElastic {
     }
 
     /**
-     * @property string domain
+     * @property string locale
      * @property string version
      */
     class Bootstrap {
@@ -28,12 +30,44 @@ namespace wpElastic {
       public static $instance = false;
 
       /**
-       * Settings Instance.
+       * -
        *
-       * @property $_settings
+       * @property $basename
        * @type {Object}
        */
       public $basename = 'wp-elastic';
+
+      /**
+       * -
+       *
+       * @property $basename
+       * @type {Object}
+       */
+      public $file = null;
+
+      /**
+       * -
+       *
+       * @property $basename
+       * @type {Object}
+       */
+      public $path = null;
+
+      /**
+       * -
+       *
+       * @property $basename
+       * @type {Object}
+       */
+      public $url = null;
+
+      /**
+       * -
+       *
+       * @property $basename
+       * @type {Object}
+       */
+      public $relative = null;
 
       /**
        * Settings Instance.
@@ -59,34 +93,36 @@ namespace wpElastic {
 
         $wp_elastic = self::$instance = &$this;
 
-        // Set Essentials.
-        $this->basename     = plugin_basename( dirname( __DIR__ ) . '/wp-elastic.php' );
-        $this->path         = plugin_dir_path( dirname( __DIR__ ) . '/wp-elastic.php' );
-        $this->url          = plugin_dir_url( dirname( __DIR__ ) . '/wp-elastic.php' );
+        try {
 
-        // Initialize Settings and set defaults.
-        $this->_settings = new Settings( array(
-          'store' => 'options',
-          'key'   => 'wp-elastic'
-        ));
+          // Set Essentials.
+          $this->file         = wp_normalize_path( dirname( __DIR__ ) . '/wp-elastic.php' );
+          $this->basename     = plugin_basename( dirname( __DIR__ ) . '/wp-elastic.php' );
+          $this->path         = plugin_dir_path( dirname( __DIR__ ) . '/wp-elastic.php' );
+          $this->url          = plugin_dir_url( dirname( __DIR__ ) . '/wp-elastic.php' );
+          $this->relative     = str_replace( trailingslashit( WP_PLUGIN_DIR ), '', $this->file );
 
-        // Set Computed Options.
-        $this->set( get_file_data( ( dirname( __DIR__ ) . '/wp-elastic.php' ), array(
-          'name' => 'Plugin Name',
-          'uri' => 'Plugin URI',
-          'description' => 'Description',
-          'version' => 'Version',
-          'domain' => 'Text Domain'
-        )));
+          // Initialize Settings and set defaults.
+          $this->_settings = new Settings( array(
+            'store' => 'options',
+            'key'   => 'wp-elastic'
+          ));
 
-        // @temp
-        $this->set( 'supports.toolbar.enabled', true );
-        $this->set( 'supports.exporting.enabled', true );
-        $this->set( 'supports.importing.enabled', true );
-        $this->set( 'supports.mapping.enabled', true );
-        $this->set( 'supports.object-cache.enabled', true );
+          // Set Computed Options.
+          $this->set( get_file_data( ( dirname( __DIR__ ) . '/wp-elastic.php' ), array(
+            'name' => 'Plugin Name',
+            'uri' => 'Plugin URI',
+            'description' => 'Description',
+            'version' => 'Version',
+            'locale' => 'Text Domain'
+          )));
 
-        $this->set( 'service.index',              Utility::indexName( get_bloginfo( 'name' ) ) );
+          $this->checkDependencies();
+
+        } catch( Exception $e ) {
+          _doing_it_wrong( 'wpElastic\Bootstrap::__construct', $e->getMessage(), '1.0.1' );
+          return $this;
+        }
 
         // Core Actions.
         add_action( 'admin_init',                 array( $this, 'admin_init' ), 20 );
@@ -96,11 +132,11 @@ namespace wpElastic {
         add_action( 'wp_before_admin_bar_render', array( $this, 'toolbar' ), 10 );
 
         // AJAX Actions.
-        add_action( 'wp_ajax_/elastic/status',    array( $this, 'api_handler' ), 100 );
-        add_action( 'wp_ajax_/elastic/mapping',   array( $this, 'api_handler' ), 100 );
-        add_action( 'wp_ajax_/elastic/settings',  array( $this, 'api_handler' ), 100 );
-        add_action( 'wp_ajax_/elastic/service',   array( $this, 'api_handler' ), 100 );
-        add_action( 'wp_ajax_/elastic/search',    array( $this, 'api_handler' ), 100 );
+        add_action( 'wp_ajax_/elastic/status',    array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/elastic/mapping',   array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/elastic/settings',  array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/elastic/service',   array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/elastic/search',    array( $this, 'api_router' ), 100 );
 
         // Customizer Actions.
         add_action( 'customize_preview_init',     array( $this, 'customize_preview_init' ), 10 );
@@ -124,8 +160,25 @@ namespace wpElastic {
         add_filter( 'plugin_action_links_' . $this->basename, array( 'wpElastic\Bootstrap', 'action_links' ), -10 );
 
         // Upgrade Control.
-        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( $this, 'activate' ) );
+        register_uninstall_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'uninstall' ) );
+        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( $this, 'activate' ) );
         register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( $this, 'deactivate' ) );
+
+      }
+
+      /**
+       * Check Dependency Versions.
+       *
+       * @throws Exception
+       */
+      private function checkDependencies() {
+
+        // Check UsabilityDynamics\Settings version.
+        if( version_compare( '0.2.1', Settings::$version ) >= 1 ) {
+          throw new Exception( __( sprintf( 'Settings library version is invalid, wpElastic requires 0.2.1 or higher, while %s is available.', Settings::$version ),  $this->get( 'locale' ) ) );
+        };
+
+        // wp_die( '<h1>' . __( 'wpElastic Critical Failure', $this->get( 'locale' ) ) . '</h1><p>' . $e->getMessage() . '</p>' );
 
       }
 
@@ -133,7 +186,7 @@ namespace wpElastic {
        * AJAX Handler.
        *
        */
-      public function api_handler() {
+      public function api_router() {
 
         $method   = $_SERVER[ 'REQUEST_METHOD' ];
         $action   = $_GET[ 'action' ];
@@ -146,7 +199,7 @@ namespace wpElastic {
 
           return wp_send_json(array(
             'ok' => true,
-            'message' => __( 'Returning wpElastic settings.', $this->get( 'domain' ) ),
+            'message' => __( 'Returning wpElastic settings.', $this->get( 'locale' ) ),
             'settings' => $this->get()
           ));
 
@@ -163,7 +216,7 @@ namespace wpElastic {
 
           return wp_send_json(array(
             'ok' => true,
-            'message' => __( 'Returning wpElastic settings.', $this->get( 'domain' ) ),
+            'message' => __( 'Returning wpElastic settings.', $this->get( 'locale' ) ),
             'settings' => $this->get()
           ));
 
@@ -177,7 +230,7 @@ namespace wpElastic {
 
           return wp_send_json(array(
             'ok' => true,
-            'message' => __( 'Successfully flushed wpElastic settings.', $this->get( 'domain' ) ),
+            'message' => __( 'Successfully flushed wpElastic settings.', $this->get( 'locale' ) ),
             'settings' => $this->get()
           ));
 
@@ -188,7 +241,7 @@ namespace wpElastic {
 
           return wp_send_json(array(
             'ok' => true,
-            'message' => __( 'The wpElastic service is enabled.', $this->get( 'domain' ) )
+            'message' => __( 'The wpElastic service is enabled.', $this->get( 'locale' ) )
           ));
 
         }
@@ -198,7 +251,7 @@ namespace wpElastic {
 
           return wp_send_json(array(
             'ok' => true,
-            'message' => __( 'The wpElastic service is enabled.', $this->get( 'domain' ) )
+            'message' => __( 'The wpElastic service is enabled.', $this->get( 'locale' ) )
           ));
 
         }
@@ -252,6 +305,19 @@ namespace wpElastic {
       }
 
       /**
+       * Uninstall Plugin.
+       *
+       * Must be static.
+       *
+       */
+      static public function uninstall() {
+
+        // $this->set( '_status', 'uninstalled' );
+        // $this->_settings->commit();
+
+      }
+
+      /**
        * @param $links
        *
        * @return array
@@ -266,6 +332,10 @@ namespace wpElastic {
        *
        */
       public function admin_init() {
+        global $wp_plugin_paths;
+
+        // get_plugin_files( $this->relative );
+        // deactivate_plugins($file, true);
 
       }
 
@@ -289,11 +359,11 @@ namespace wpElastic {
             'html'     => '<div class="wp-elastic-toolbar-info"></div>',
             'target'   => '',
             'onclick'  => '',
-            'title'    => __( 'wpElastic', $this->get( 'domain' ) ),
+            'title'    => __( 'wpElastic', $this->get( 'locale' ) ),
             'tabindex' => 10,
             'class'    => 'wp-elastic-toolbar'
           ),
-          'title' => __( 'wpElastic', $this->get( 'domain' ) ),
+          'title' => __( 'wpElastic', $this->get( 'locale' ) ),
           'href'  => network_admin_url( 'admin.php?page=wp-elastic' )
         ));
 
@@ -331,14 +401,14 @@ namespace wpElastic {
 
         // Site Only.
         if( current_filter() === 'admin_menu' ) {
-          $this->_pages[ 'services' ] = add_options_page(   __( 'Services', $this->get( 'domain' ) ), __( 'Services', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_template' ) );
-          $this->_pages[ 'tools' ]    = add_dashboard_page( __( 'Elastic', $this->get( 'domain' ) ),  __( 'Elastic', $this->get( 'domain' ) ),  'manage_options', 'wp-elastic-tools',   array( $this, 'admin_template' ) );
+          $this->_pages[ 'services' ] = add_options_page(   __( 'wpElastic', $this->get( 'locale' ) ),  __( 'wpElastic', $this->get( 'locale' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_template' ) );
+          $this->_pages[ 'tools' ]    = add_dashboard_page( __( 'wpElastic', $this->get( 'locale' ) ),  __( 'wpElastic', $this->get( 'locale' ) ),  'manage_options', 'wp-elastic-tools',   array( $this, 'admin_template' ) );
         }
 
         // Network Only.
         if( current_filter() === 'network_admin_menu' ) {
-          $this->_pages[ 'services' ] = add_options_page( __( 'Services', $this->get( 'domain' ) ), __( 'Services', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_template' ) );
-          $this->_pages[ 'reports' ]  = add_submenu_page( 'index.php', __( 'Reports', $this->get( 'domain' ) ), __( 'Reports', $this->get( 'domain' ) ), 'manage_options', 'wp-elastic-reports', array( $this, 'admin_template' ) );
+          $this->_pages[ 'services' ] = add_options_page( __( 'wpElastic', $this->get( 'locale' ) ), __( 'wpElastic', $this->get( 'locale' ) ), 'manage_options', 'wp-elastic-service', array( $this, 'admin_template' ) );
+          $this->_pages[ 'reports' ]  = add_submenu_page( 'index.php', __( 'Reports', $this->get( 'locale' ) ), __( 'Reports', $this->get( 'locale' ) ), 'manage_options', 'wp-elastic-reports', array( $this, 'admin_template' ) );
         }
 
       }
