@@ -128,8 +128,9 @@ namespace wpElastic {
         add_action( 'admin_init',                 array( $this, 'admin_init' ), 20 );
         add_action( 'admin_menu',                 array( $this, 'admin_menu' ), 20 );
         add_action( 'network_admin_menu',         array( $this, 'admin_menu' ), 20 );
-        add_action( 'admin_enqueue_scripts',      array( $this, 'admin_scripts' ), 20 );
         add_action( 'wp_before_admin_bar_render', array( $this, 'toolbar' ), 10 );
+        add_action( 'admin_enqueue_scripts',      array( $this, 'enqueue_scripts' ), 20 );
+        add_action( 'wp_enqueue_scripts',         array( $this, 'enqueue_scripts' ), 20 );
 
         // AJAX Actions.
         add_action( 'wp_ajax_/elastic/status',    array( $this, 'api_router' ), 100 );
@@ -190,7 +191,7 @@ namespace wpElastic {
 
         $method   = $_SERVER[ 'REQUEST_METHOD' ];
         $action   = $_GET[ 'action' ];
-        $payload  = $_POST[ 'data' ];
+        $payload  = isset( $_POST[ 'data' ] ) ? $_POST[ 'data' ] : array();
 
         nocache_headers();
 
@@ -431,23 +432,32 @@ namespace wpElastic {
        *
        * @action admin_enqueue_scripts
        */
-      public function admin_scripts() {
+      public function enqueue_scripts() {
 
-        // Register Libraies and Styles..
+        // Register Libraies.
         wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
         wp_register_script( 'wp-elastic.admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
 
+        // Register Styles.
+        wp_register_style( 'wp-elastic.toolbar',    $this->url . '/static/styles/wp-elastic.toolbar.css',   array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic',            $this->url . '/static/styles/wp-elastic.css',           array(), $this->get( 'version' ), 'all' );
+
         // Include udx.requires on all wp-elastic pages.
-        if( in_array( get_current_screen()->id, $this->_pages ) ) {
+        if( current_filter() === 'admin_enqueue_scripts' &&  in_array( get_current_screen()->id, $this->_pages ) ) {
           wp_enqueue_script( 'udx-requires' );
-          wp_enqueue_style( 'wp-elastic', $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
+          wp_enqueue_style( 'wp-elastic' );
           add_action( 'admin_print_footer_scripts', array( $this, 'admin_script_debug' ), 100 );
         }
 
         // Global Toolbar.
-        wp_enqueue_style( 'wp-elastic-toolbar',     $this->url . '/static/styles/wp-elastic.toolbar.css', array(), $this->get( 'version' ), 'all' );
+        if( is_admin_bar_showing() ) {
+          wp_enqueue_style( 'wp-elastic.toolbar' );
+        }
+
+        // Frontend Scripts.
+        // if( current_filter() === 'wp_enqueue_scripts' && is_admin_bar_showing() ) {}
 
       }
 
