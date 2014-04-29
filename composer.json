@@ -2,13 +2,22 @@
   "name": "UsabilityDynamics/wp-elastic",
   "description": "Improve WordPress search performance/accuracy and enable faceted search by leveraging an ElasticSearch server.",
   "version": "2.4.0",
+  "type": "wordpress-plugin",
   "keywords": [
     "elasticsearch",
     "wordpress",
     "search"
   ],
-  "license": "MIT",
-  "minimum-stability": "dev",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://repository.usabilitydynamics.com"
+    },
+    {
+      "type": "git",
+      "url": "git@github.com:UsabilityDynamics/wp-elastic.git"
+    }
+  ],
   "authors": [
     {
       "name": "Andy Potanin",
@@ -19,11 +28,44 @@
       "homepage": "http://parisholley.com"
     }
   ],
+  "config": {
+    "vendor-dir": "vendor/libraries",
+    "optimize-autoloader": true,
+    "autoloader-suffix": "VendorPackages"
+  },
+  "extra": {
+    "installer-paths": {
+      "vendor/plugins/{$name}": [
+        "type:wordpress-plugin"
+      ],
+      "vendor/extensions/{$name}": [
+        "type:wordpress-extensions"
+      ],
+      "vendor/themes/{$name}": [
+        "type:wordpress-theme"
+      ]
+    }
+  },
   "autoload": {
-    "classmap": [ "lib" ]
+    "classmap": [ "lib" ],
+    "files": [
+      "api/global.php",
+      "api/template.php"
+    ]
   },
   "require": {
     "usabilitydynamics/lib-settings": "master",
     "usabilitydynamics/lib-ui": "master"
-  }
+  },
+  "scripts": {
+    "pre-install-cmd": [
+      "npm install --silent",
+      "grunt clean:install"
+    ],
+    "post-install-cmd": [
+      "grunt install --force"
+    ]
+  },
+  "license": "GPLv2",
+  "minimum-stability": "dev"
 }
