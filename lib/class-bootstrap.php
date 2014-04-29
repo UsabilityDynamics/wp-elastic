@@ -338,6 +338,10 @@ namespace wpElastic {
         // get_plugin_files( $this->relative );
         // deactivate_plugins($file, true);
 
+        // wp_cache_add( 'key1', 'blah', 'balls' );
+        // global $wp_object_cache;
+        // die( '<pre>' . print_r( $wp_object_cache, true ) . '</pre>' );
+
       }
 
       /**
