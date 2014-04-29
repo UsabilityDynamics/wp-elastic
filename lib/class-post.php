@@ -1,9 +1,13 @@
 <?php
 namespace wpElastic {
 
-  class Post extends Document {
+  if( !class_exists( 'wpElastic\Document' ) ) {
 
-    function __construct() {
+    class Post extends Document {
+
+      function __construct() {
+
+      }
 
     }
 

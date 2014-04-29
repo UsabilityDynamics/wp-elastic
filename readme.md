@@ -16,4 +16,9 @@ wip
 * Synchornize
 * Flush
 
+## API Endpoints
+
+* /wp-admin/admin-ajax.php?action=/elastic/status
+* /wp-admin/admin-ajax.php?action=/elastic/settings
+
 ## Building

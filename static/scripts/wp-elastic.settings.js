@@ -1,1 +1,1 @@
-console.log("wp-elastic.settings");
+define(function(){return console.debug("wp-elastic.settings"),{}});

@@ -1,10 +1,13 @@
 <?php
 namespace wpElastic {
 
-  class Utility {
+  if( !class_exists( 'wpElastic\Utility' ) ) {
 
-    function getMapping() {
+    class Utility {
 
+      function getMapping() {
+
+      }
     }
 
   }

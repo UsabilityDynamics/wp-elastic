@@ -1,10 +1,12 @@
 <?php
 namespace wpElastic {
 
-  class Import {
+  if( !class_exists( 'wpElastic\Impoter' ) ) {
+    class Importer {
 
-    function __construct() {
+      function __construct() {
 
+      }
     }
 
   }

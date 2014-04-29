@@ -1,9 +1,13 @@
 <?php
 namespace wpElastic {
 
-  class Document {
+  if( !class_exists( 'wpElastic\Document' ) ) {
 
-    function __construct() {
+    class Document {
+
+      function __construct() {
+
+      }
 
     }
 

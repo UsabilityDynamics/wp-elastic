@@ -92,6 +92,12 @@ module.exports = function build( grunt ) {
             cwd: 'static/scripts/src',
             src: '*.js',
             dest: 'static/scripts'
+          },
+          {
+            expand: true,
+            cwd: 'static/scripts/src/modules',
+            src: '*.js',
+            dest: 'static/scripts/modules'
           }
         ]
       }

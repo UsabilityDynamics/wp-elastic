@@ -1,9 +1,13 @@
 <?php
 namespace wpElastic {
 
-  class User extends Document {
+  if( !class_exists( 'wpElastic\User' ) ) {
 
-    function __construct() {
+    class User extends Document {
+
+      function __construct() {
+
+      }
 
     }
 

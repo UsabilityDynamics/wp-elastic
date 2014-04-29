@@ -1,1 +1,1 @@
-console.log("wp-elastic.mapping");
+define(function(){return console.debug("wp-elastic.mapping"),{}});
