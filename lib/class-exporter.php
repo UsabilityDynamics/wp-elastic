@@ -1,14 +1,14 @@
 <?php
 namespace wpElastic {
 
-  if( !class_exists( 'wpElastic\Document' ) ) {
+  if( !class_exists( 'wpElastic\Exporter' ) ) {
 
-    class Post extends Document {
+    class Exporter {
 
       function __construct() {
 
       }
-
+      
     }
 
   }

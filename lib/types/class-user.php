@@ -1,7 +1,7 @@
 <?php
-namespace wpElastic {
+namespace wpElastic\Document {
 
-  if( !class_exists( 'wpElastic\User' ) ) {
+  if( !class_exists( 'wpElastic\Document\User' ) ) {
 
     class User extends Document {
 

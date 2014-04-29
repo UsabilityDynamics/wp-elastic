@@ -1,5 +1,13 @@
 wip
 
+## Options
+
+* Synchronize Posts
+* Synchronize Users
+* Synchronize Options
+* Synchronize Links
+* Synchronize Comments
+
 ## Settings
 * Server URL
 * Server Authentication
