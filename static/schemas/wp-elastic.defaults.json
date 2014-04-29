@@ -1,0 +1,17 @@
+{
+  "supports": {
+    "mapping-editor": {},
+    "object-cache": {},
+    "data-importing": {},
+    "data-exporting": {}
+  },
+  "service": {
+    "url": "http://api.wpElastic.io",
+    "authentication": {},
+    "index": null
+  },
+  "data": {
+    "types": [ "post", "page" ],
+    "mapping": {}
+  }
+}

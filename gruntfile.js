@@ -68,13 +68,13 @@ module.exports = function build( grunt ) {
       },
       less: {
         files: [
-          'styles/src/*.*'
+          'static/styles/src/*.less'
         ],
         tasks: [ 'less' ]
       },
       js: {
         files: [
-          'scripts/src/*.*'
+          'static/scripts/src/*.js'
         ],
         tasks: [ 'uglify' ]
       }
