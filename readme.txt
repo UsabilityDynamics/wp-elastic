@@ -9,9 +9,7 @@ Stable tag: 2.2.1
 == Description ==
 
 The plugin allows the setup of continous content data synchronization between your WordPress site and an Elasticsearch cluster.
-
 This plugin assumes you have a ready-to-use Elasticsearch installation.
-
 Visit project on GitHub: https://github.com/UsabilityDynamics/wp-elastic
 
 = Features =

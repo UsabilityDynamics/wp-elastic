@@ -11,24 +11,19 @@
   "minimum-stability": "dev",
   "authors": [
     {
-      "name": "Paris Holley",
-      "homepage": "http://parisholley.com"
-    },
-    {
       "name": "Andy Potanin",
       "homepage": "http://usabilitydynamics.com"
+    },
+    {
+      "name": "Paris Holley",
+      "homepage": "http://parisholley.com"
     }
   ],
   "autoload": {
-    "classmap": [
-      "src/bootstrap.php",
-      "src/elasticsearch",
-      "wp/bootstrap.php",
-      "wp/admin"
-    ]
+    "classmap": [ "lib" ]
   },
   "require": {
-    "ruflin/elastica": "v0.90.1.0",
-    "electrolinux/phpquery": "0.9.6"
+    "usabilitydynamics/lib-settings": "master",
+    "usabilitydynamics/lib-ui": "master"
   }
 }

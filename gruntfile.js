@@ -31,19 +31,33 @@ module.exports = function build( grunt ) {
           yuicompress: true,
           relativeUrls: true
         },
-        files: {
-          'styles/app.css': [ 'styles/src/app.less' ],
-          'styles/login.css': [ 'styles/src/login.less' ]
-        }
+        files: [
+          {
+            expand: true,
+            cwd: 'static/styles/src',
+            src: '*.less',
+            dest: 'static/styles',
+            rename: function(dest, src, options) {
+              return dest + '/' + src.replace( '.less', '.dev.css' );
+            }
+          }
+        ]
       },
       development: {
         options: {
           relativeUrls: true
         },
-        files: {
-          'styles/login.dev.css': [ 'styles/src/login.less' ],
-          'styles/app.dev.css': [ 'styles/src/app.less' ]
-        }
+        files: [
+          {
+            expand: true,
+            cwd: 'static/styles/src',
+            src: '*.less',
+            dest: 'static/styles',
+            rename: function(dest, src, options) {
+              return dest + '/' + src.replace( '.less', '.css' );
+            }
+          }
+        ]
       }
     },
 
@@ -70,16 +84,16 @@ module.exports = function build( grunt ) {
       minified: {
         options: {
           preserveComments: false,
-          wrap: true,
-          mangle: {
-            except: [ 'jQuery', 'Bootstrap' ]
-          }
+          mangle: { except: [ 'jQuery' ] }
         },
-        files: {
-          'scripts/app.js': [
-            'scripts/src/app.js'
-          ]
-        }
+        files: [
+          {
+            expand: true,
+            cwd: 'static/scripts/src',
+            src: '*.js',
+            dest: 'static/scripts'
+          }
+        ]
       }
     },
 
@@ -108,19 +122,8 @@ module.exports = function build( grunt ) {
     clean: {
       all: [
         "composer.lock",
-        "scripts/app.js",
-        "scripts/contact-form-7.js",
-        "scripts/foobox.js",
-        "scripts/require.js",
-        "scripts/utility.js",
-        "components/*",
         "vendor/*",
-        "styles/*.css",
-        "scripts/emitter",
-        "scripts/event",
-        "scripts/indexof",
-        "scripts/ui",
-        "scripts/utility"
+        "build/*"
       ],
       "update": [
         "composer.lock",
@@ -128,9 +131,13 @@ module.exports = function build( grunt ) {
       ]
     },
 
-    symlink: {},
-
     shell: {
+      build: {
+        options: {
+          stdout: true
+        },
+        command: 'echo "Building..."'
+      },
       update: {
         options: {
           stdout: true
@@ -145,7 +152,6 @@ module.exports = function build( grunt ) {
   //grunt.loadNpmTasks( 'grunt-spritefiles' );
   grunt.loadNpmTasks( 'grunt-markdown' );
   grunt.loadNpmTasks( 'grunt-contrib-symlink' );
-  //grunt.loadNpmTasks( 'grunt-requirejs' );
   grunt.loadNpmTasks( 'grunt-contrib-yuidoc' );
   grunt.loadNpmTasks( 'grunt-contrib-uglify' );
   grunt.loadNpmTasks( 'grunt-contrib-watch' );
@@ -154,18 +160,12 @@ module.exports = function build( grunt ) {
   grunt.loadNpmTasks( 'grunt-contrib-clean' );
   grunt.loadNpmTasks( 'grunt-shell' );
 
-  // Register tasks
-  grunt.registerTask( 'default', [ 'markdown' ] );
+  // Default Build Task.
+  grunt.registerTask( 'default', [ 'markdown', 'uglify', 'less' ] );
 
-  // Build Distribution
-  grunt.registerTask( 'distribution', [] );
+  // Build Distribution.
+  grunt.registerTask( 'build', [ 'shell:build' ] );
 
-  // Update Environment
-  // grunt.registerTask( 'update', [ "clean:update", "shell:update" ] );
-
-  // Clean, preparing for update
-  //grunt.registerTask( 'clean', [  ] );
-
-  grunt.registerTask( 'dev', [ 'symlink', 'watch' ] );
+  grunt.registerTask( 'dev', [ 'watch' ] );
 
 };
