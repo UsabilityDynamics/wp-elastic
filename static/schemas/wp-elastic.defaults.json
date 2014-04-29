@@ -1,14 +1,27 @@
 {
   "supports": {
-    "mapping-editor": {},
-    "object-cache": {},
-    "data-importing": {},
-    "data-exporting": {}
+    "mapping": {
+      "enabled": true
+    },
+    "object-cache": {
+      "enabled": true
+    },
+    "importing": {
+      "enabled": true
+    },
+    "exporting": {
+      "enabled": true
+    },
+    "toolbar": {
+      "enabled": true
+    }
   },
   "service": {
-    "url": "http://api.wpElastic.io",
-    "authentication": {},
-    "index": null
+    "url": "http://api.wpelastic.io/v1",
+    "key": {
+      "public": "",
+      "private": ""
+    }
   },
   "data": {
     "types": [ "post", "page" ],

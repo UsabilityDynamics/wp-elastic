@@ -4,7 +4,7 @@
   */
  ?>
 
-<div data-requires="wp-elastic.admin" class="wrap view-model">
+<section data-requires="wp-elastic.admin" class="wrap view-model">
   <h2 data-bind="text: title"></h2>
 
   <div data-requires="wp-elastic.mapping" class="section wp-elastic-mapping view-model">
@@ -15,22 +15,14 @@
     <h3>Settings</h3>
   </div>
 
-</div>
+</section>
 
-<script type="text/javascript">
-
-  // Configure udx.require.js
-  require.config({
-    baseUrl: '/wp-content/plugins/wp-elastic/static/scripts/',
-    config: {
-      ajaxurl: ajaxurl,
-      view: pagenow,
-      adminpage: adminpage
-    }
-  });
+<script id="wp-elastic-settings-script">
 
   // Declare dependencies.
-  require( [ 'udx.utility', 'knockout' ], bindView );
+  if( 'function' === typeof require ) {
+    require( [ 'udx.utility', 'knockout' ], bindView );
+  }
 
   /**
    * Initialize View.
@@ -43,4 +35,9 @@
   }
 
 </script>
+
+<style id="wp-elastic-settings-style">
+  section.wrap h2 { color: blue; }
+</style>
+
 

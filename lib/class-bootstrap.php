@@ -1,9 +1,15 @@
 <?php
 namespace wpElastic {
 
-  use \UsabilityDynamics\Settings;
-
   if( !class_exists( 'wpElastic\Bootstrap' ) ) {
+
+    if( !class_exists( 'wpElastic\Utility' ) ) {
+      require_once( 'class-utility.php' );
+    }
+
+    if( !class_exists( 'wpElastic\Settings' ) ) {
+      require_once( 'class-settings.php' );
+    }
 
     /**
      * @property string domain
@@ -59,7 +65,7 @@ namespace wpElastic {
         $this->url          = plugin_dir_url( dirname( __DIR__ ) . '/wp-elastic.php' );
 
         // Initialize Settings and set defaults.
-        $this->_settings    = new Settings( array(
+        $this->_settings = new Settings( array(
           'store' => 'options',
           'key'   => 'wp-elastic'
         ));
@@ -73,18 +79,34 @@ namespace wpElastic {
           'domain' => 'Text Domain'
         )));
 
+        // @temp
+        $this->set( 'supports.toolbar.enabled', true );
+        $this->set( 'supports.exporting.enabled', true );
+        $this->set( 'supports.importing.enabled', true );
+        $this->set( 'supports.mapping.enabled', true );
+        $this->set( 'supports.object-cache.enabled', true );
+
+        $this->set( 'service.url',                'http://elastic.uds.io:12200' );
+        $this->set( 'service.key.public',         'public-key' );
+        $this->set( 'service.key.secret',         'private-key' );
+        $this->set( 'service.index',              Utility::indexName( get_bloginfo( 'name' ) ) );
+
         // Core Actions.
         add_action( 'admin_init',                 array( $this, 'admin_init' ), 20 );
         add_action( 'admin_menu',                 array( $this, 'admin_menu' ), 20 );
         add_action( 'network_admin_menu',         array( $this, 'admin_menu' ), 20 );
         add_action( 'admin_enqueue_scripts',      array( $this, 'admin_scripts' ), 20 );
+        add_action( 'wp_before_admin_bar_render', array( $this, 'toolbar' ), 10 );
 
         // AJAX Actions.
-        add_action( 'wp_ajax_/elastic/status',    array( $this, 'ajax_handler' ), 20 );
-        add_action( 'wp_ajax_/elastic/settings',  array( $this, 'ajax_handler' ), 20 );
+        add_action( 'wp_ajax_/elastic/status',    array( $this, 'api_handler' ), 100 );
+        add_action( 'wp_ajax_/elastic/mapping',   array( $this, 'api_handler' ), 100 );
+        add_action( 'wp_ajax_/elastic/settings',  array( $this, 'api_handler' ), 100 );
+        add_action( 'wp_ajax_/elastic/service',   array( $this, 'api_handler' ), 100 );
+        add_action( 'wp_ajax_/elastic/search',    array( $this, 'api_handler' ), 100 );
 
         // Customizer Actions.
-        add_action( 'customize_preview_init',     array( $this, 'customize_preview_init' ), 20 );
+        add_action( 'customize_preview_init',     array( $this, 'customize_preview_init' ), 10 );
 
         // Synchroniation Filters.
         add_action( 'deleted_user',               array( $this, 'deleted_user' ) );
@@ -114,15 +136,33 @@ namespace wpElastic {
        * AJAX Handler.
        *
        */
-      public function ajax_handler() {
+      public function api_handler() {
 
         $method   = $_SERVER[ 'REQUEST_METHOD' ];
         $action   = $_GET[ 'action' ];
+        $payload  = $_POST[ 'data' ];
 
         nocache_headers();
 
         // Get Settings.
-        if( $method === 'GET' && $action === '/elastic/settings' ) {
+        if( $method === 'GET'   && $action === '/elastic/settings' ) {
+
+          return wp_send_json(array(
+            'ok' => true,
+            'message' => __( 'Returning wpElastic settings.', $this->get( 'domain' ) ),
+            'settings' => $this->get()
+          ));
+
+        }
+
+        // Update Settings.
+        if( $method === 'POST'  && $action === '/elastic/settings' ) {
+
+          // Set Updated.
+          $this->set( $payload );
+
+          // Commit Settings.
+          $this->_settings->commit();
 
           return wp_send_json(array(
             'ok' => true,
@@ -133,7 +173,17 @@ namespace wpElastic {
         }
 
         // Get Status.
-        if( $method === 'GET' && $action === '/elastic/status' ) {
+        if( $method === 'GET'   && $action === '/elastic/status' ) {
+
+          return wp_send_json(array(
+            'ok' => true,
+            'message' => __( 'The wpElastic service is enabled.', $this->get( 'domain' ) )
+          ));
+
+        }
+
+        // Get Service Information.
+        if( $method === 'GET'   && $action === '/elastic/service' ) {
 
           return wp_send_json(array(
             'ok' => true,
@@ -195,7 +245,7 @@ namespace wpElastic {
        *
        * @return array
        */
-      static function action_links( $links ) {
+      public function action_links( $links ) {
         $links[] = '<a href="options-general.php?page=elastic_search"><b>Settings</b></a>';
         $links[] = '<a target="_blank" href="https://github.com/UsabilityDynamics/wp-elastic/wiki"><b>Documentation</b></a>';
         return $links;
@@ -204,7 +254,62 @@ namespace wpElastic {
       /**
        *
        */
-      static function admin_init() {
+      public function admin_init() {
+
+      }
+
+      /**
+       * Shows Veneer Status (in dev)
+       *
+       * @method toolbar
+       * @for Boostrap
+       */
+      public function toolbar() {
+        global $wp_admin_bar;
+
+        if( !$this->get( 'supports.toolbar.enabled' ) ) {
+          return;
+        }
+
+        $wp_admin_bar->add_menu( array(
+          'id'    => 'wp-elastic',
+          'parent'    => 'top-secondary',
+          'meta'  => array(
+            'html'     => '<div class="wp-elastic-toolbar-info"></div>',
+            'target'   => '',
+            'onclick'  => '',
+            'title'    => __( 'wpElastic', $this->get( 'domain' ) ),
+            'tabindex' => 10,
+            'class'    => 'wp-elastic-toolbar'
+          ),
+          'title' => __( 'wpElastic', $this->get( 'domain' ) ),
+          'href'  => network_admin_url( 'admin.php?page=wp-elastic' )
+        ));
+
+        $wp_admin_bar->add_menu( array(
+          'parent' => 'wp-elastic',
+          'id'     => 'wp-elastic-pagespeed',
+          'meta'   => array(),
+          'title'  => 'PageSpeed',
+          'href'   => network_admin_url( 'admin.php?page=wp-elastic#panel=cdn' )
+        ));
+
+        $wp_admin_bar->add_menu( array(
+          'parent' => 'wp-elastic',
+          'id'     => 'wp-elastic-cloudfront',
+          'meta'   => array(),
+          'title'  => 'CloudFront',
+          'href'   => network_admin_url( 'admin.php?page=wp-elastic#panel=cdn' )
+        ));
+
+        $wp_admin_bar->add_menu( array(
+          'parent' => 'wp-elastic',
+          'id'     => 'wp-elastic-varnish',
+          'meta'   => array(),
+          'title'  => 'Varnish',
+          'href'   => network_admin_url( 'admin.php?page=wp-elastic#panel=cdn' )
+        ));
+
       }
 
       /**
@@ -248,16 +353,31 @@ namespace wpElastic {
       public function admin_scripts() {
 
         // Register Libraies and Styles..
-        wp_register_script( 'udx-requires',   '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
-
+        wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
         wp_register_script( 'wp-elastic.admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
 
-        wp_enqueue_style( 'wp-elastic',       $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
-
+        // Include udx.requires on all wp-elastic pages.
         if( in_array( get_current_screen()->id, $this->_pages ) ) {
           wp_enqueue_script( 'udx-requires' );
+          wp_enqueue_style( 'wp-elastic', $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
+          add_action( 'admin_print_footer_scripts', array( $this, 'admin_script_debug' ));
+        }
+
+        // Global Toolbar.
+        wp_enqueue_style( 'wp-elastic-toolbar',     $this->url . '/static/styles/wp-elastic.toolbar.css', array(), $this->get( 'version' ), 'all' );
+
+      }
+
+      /**
+       * Local Development
+       *
+       */
+      static function admin_script_debug() {
+
+        if( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && defined( 'WP_ELASTIC_BASEURL' ) ) {
+          echo '<script>"function" === typeof require ? require.set( "baseUrl", "' . WP_ELASTIC_BASEURL . '" ) : console.error( "wp-elastic", "udx.require.js not found" );</script>';
         }
 
       }

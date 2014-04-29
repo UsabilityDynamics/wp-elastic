@@ -3,10 +3,10 @@ namespace wpElastic {
 
   if( !class_exists( 'wpElastic\Utility' ) ) {
 
-    class Utility {
+    class Utility extends \UsabilityDynamics\Utility {
 
-      function getMapping() {
-
+      static public function indexName( $data ) {
+        return self::create_slug( $data );
       }
     }
 
