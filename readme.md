@@ -21,20 +21,26 @@ wip
 * counts
 
 ## Document Types
-* Post      - Thing > CreativeWork > Article > BlogPosting
-* Page
-* Media     - Thing > CreativeWork > MediaObject
-* Image     - Thing > CreativeWork > MediaObject > ImageObject
-* Music     - Thing > CreativeWork > MusicRecording
-* Software  - Thing > CreativeWork > SoftwareApplication
-* User
-* Option
-* Cache
-* Link
-* Comment   - Thing > CreativeWork > Comment
-* Product
-* Term
-* Order
+* Post            - Thing > CreativeWork > Article > BlogPosting
+* News            - Thing > CreativeWork > Article > NewsArticle
+* Page            - Thing > CreativeWork > WebPage
+* Image           - Thing > CreativeWork > MediaObject > ImageObject
+* Music           - Thing > CreativeWork > MusicRecording
+* Software        - Thing > CreativeWork > SoftwareApplication
+* WebApp          - Thing > CreativeWork > SoftwareApplication > WebApplication
+* MobileApp       - Thing > CreativeWork > SoftwareApplication > MobileApplication
+* Comment         - Thing > CreativeWork > Comment
+* Event           - Thing > Event
+* Festival        - Thing > Event > Festival
+* EventVenue      - Thing > Place > CivicStructure > EventVenue
+* Artist          - Thing > Organization > PerformingGroup
+* Agent           - Thing > Organization > LocalBusiness > RealEstateAgent
+* Apartment       - Thing > Place > Residence > ApartmentComplex
+* SingleFamily    - Thing > Place > Residence > SingleFamilyResidence
+* Location        - Thing > Place
+* User            - Thing > Person
+* Product         - Thing > Product
+* Offer           - Thing > Intangible > Offer
 
 ## Global Groups (global_groups)
 Non-blog specific on multisite.
@@ -51,8 +57,6 @@ Non-blog specific on multisite.
 [rss] => 1
 [global-posts] => 1
 [blog-id-cache] => 1
-
-
 
 ## Settings
 * Server URL
