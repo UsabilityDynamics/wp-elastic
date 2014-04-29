@@ -2,6 +2,7 @@ cgi-bin
 .ftpquota
 error_log
 
+build
 temp
 node_modules
 npm-debug.log
