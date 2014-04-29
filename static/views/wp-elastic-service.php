@@ -5,7 +5,7 @@
  ?>
 
 <section data-requires="wp-elastic.settings" class="wrap view-model">
-  <h2><?php _e( 'Settings', wp_elastic( 'domain' ) ); ?></h2>
+  <h2><?php _e( 'wpElastic Settings', wp_elastic( 'domain' ) ); ?></h2>
   <h2 data-bind="text: title"></h2>
   <pre data-bind="text: settings"></pre>
 </section>
@@ -18,7 +18,7 @@
       deps: [ 'udx.utility', 'wp-elastic.api', 'knockout' ],
       config: {
         'wp-elastic.api': {
-          ajaxurl: ajaxurl || null
+          ajaxurl: ajaxurl
         }
       },
       callback: viewCallback
@@ -32,7 +32,7 @@
    * @param ko
    */
   function viewCallback( utility, ko ) {
-    // console.debug( 'bindView', ko.version, utility.extend );
+    // console.debug( 'viewCallback' );
   }
 
 </script>
