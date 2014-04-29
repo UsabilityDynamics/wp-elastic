@@ -61,8 +61,7 @@ namespace wpElastic {
         // Initialize Settings and set defaults.
         $this->_settings    = new Settings( array(
           'store' => 'options',
-          'key'   => 'wp-elastic',
-          'data'  => json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ))
+          'key'   => 'wp-elastic'
         ));
 
         // Set Computed Options.
@@ -106,8 +105,8 @@ namespace wpElastic {
         add_filter( 'plugin_action_links_' . $this->basename, array( 'wpElastic\Bootstrap', 'action_links' ), -10 );
 
         // Upgrade Control.
-        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'activate' ) );
-        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'deactivate' ) );
+        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( $this, 'activate' ) );
+        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( $this, 'deactivate' ) );
 
       }
 
@@ -155,16 +154,39 @@ namespace wpElastic {
       }
 
       /**
+       * Set Defaults on Activation.
        *
+       * @author potanin@UD
+       * @method activate
        */
-      static function activate() {
+      public function activate() {
+
+        $defaults = json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ));
+
+        // Set Defaults.
+        if( !$this->get( '_installed' ) ) {
+          $this->set( $defaults );
+        }
+
+        $this->set( '_installed', true );
+        $this->set( '_status', 'active' );
+
+        // Save Settings on activation.
+        $this->_settings->commit();
 
       }
 
       /**
+       * Set Inactive Statuf Flag on Deactivation.
        *
+       * @author potanin@UD
+       * @method deactivate
        */
-      static function deactivate() {
+      public function deactivate() {
+
+        $this->set( '_status', 'inactive' );
+
+        $this->_settings->commit();
 
       }
 
@@ -226,18 +248,17 @@ namespace wpElastic {
       public function admin_scripts() {
 
         // Register Libraies and Styles..
-        wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false  );
-        wp_enqueue_style( 'wp-elastic', $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
+        wp_register_script( 'udx-requires',   '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
 
-        //wp_register_script( 'wp-elastic.admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
-        //wp_register_script( 'wp-elastic.mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
-        //wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
+
+        wp_enqueue_style( 'wp-elastic',       $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
 
         if( in_array( get_current_screen()->id, $this->_pages ) ) {
           wp_enqueue_script( 'udx-requires' );
         }
-
-        // wp_localize_script( 'udx-requires', 'wpElastic', $this->get() );
 
       }
 
