@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Link
+ * Single Blog / Site
  *
  * @version 2.4.0
  * @package wp-elastic
@@ -8,9 +8,9 @@
  */
 namespace wpElastic\Document {
 
-  if( !class_exists( 'wpElastic\Document\Link' ) ) {
+  if( !class_exists( 'wpElastic\Document\Blog' ) ) {
 
-    class Link extends Document {
+    class Blog extends Document {
 
       function __construct() {
 

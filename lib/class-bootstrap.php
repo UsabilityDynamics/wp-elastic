@@ -387,7 +387,7 @@ namespace wpElastic {
        */
       static function admin_script_debug() {
 
-        if( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && defined( 'WP_ELASTIC_BASEURL' ) ) {
+        if( defined( 'WP_ELASTIC_BASEURL' ) && WP_ELASTIC_BASEURL ) {
           echo '<script>"function" === typeof require ? require.config({ "baseUrl": "' . WP_ELASTIC_BASEURL . '"}) : console.error( "wp-elastic", "udx.require.js not found" );</script>';
         }
 
