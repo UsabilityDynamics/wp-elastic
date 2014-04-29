@@ -1,1 +1,1 @@
-define(function(){return console.debug("wp-elastic.settings"),{}});
+define("wp-elastic.settings",["knockout","wp-elastic.api"],function(){function a(){var a=this;return this.title=c.observable(),this.settings=c.observable(),b.getSettings(null,function(b,c){a.settings(JSON.stringify(c,null,2))}),this}var b=require("wp-elastic.api"),c=require("knockout");return function(){c.applyBindings(new a,this)}});

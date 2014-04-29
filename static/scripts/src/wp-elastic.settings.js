@@ -4,9 +4,35 @@
  * @module wp-elastic
  * @author potanin@UD
  */
-define( function wpElasticSettings() {
-  console.debug( 'wp-elastic.settings' );
+define( 'wp-elastic.settings', [ 'knockout', 'wp-elastic.api' ], function wpElasticSettings() {
+  // console.debug( 'wp-elastic.settings' );
 
-  return {};
+  var api = require( 'wp-elastic.api' );
+  var ko  = require( 'knockout' );
+
+  /**
+   *
+   * @constructor
+   */
+  function ViewModel() {
+
+    var context = this;
+
+    this.title    = ko.observable();
+    this.settings = ko.observable();
+
+    api.getSettings( null, function haveSettings( error, data ) {
+      context.settings( JSON.stringify( data, null, 2 ) );
+    });
+
+    return this;
+
+  }
+
+
+  return function domReady() {
+    // console.debug( 'wp-elastic.settings', 'domReady' );
+    ko.applyBindings( new ViewModel, this );
+  }
 
 });

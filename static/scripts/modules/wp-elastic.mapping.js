@@ -1,1 +1,0 @@
-define("wp-elastic.mapping",function(){return console.debug("wp-elastic.mapping"),{}});

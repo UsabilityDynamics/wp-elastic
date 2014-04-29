@@ -86,9 +86,6 @@ namespace wpElastic {
         $this->set( 'supports.mapping.enabled', true );
         $this->set( 'supports.object-cache.enabled', true );
 
-        $this->set( 'service.url',                'http://elastic.uds.io:12200' );
-        $this->set( 'service.key.public',         'public-key' );
-        $this->set( 'service.key.secret',         'private-key' );
         $this->set( 'service.index',              Utility::indexName( get_bloginfo( 'name' ) ) );
 
         // Core Actions.
@@ -167,6 +164,20 @@ namespace wpElastic {
           return wp_send_json(array(
             'ok' => true,
             'message' => __( 'Returning wpElastic settings.', $this->get( 'domain' ) ),
+            'settings' => $this->get()
+          ));
+
+        }
+
+        // Update Settings.
+        if( $method === 'DELETE'  && $action === '/elastic/settings' ) {
+
+          // Commit Settings.
+          $this->_settings->flush();
+
+          return wp_send_json(array(
+            'ok' => true,
+            'message' => __( 'Successfully flushed wpElastic settings.', $this->get( 'domain' ) ),
             'settings' => $this->get()
           ));
 
@@ -362,7 +373,7 @@ namespace wpElastic {
         if( in_array( get_current_screen()->id, $this->_pages ) ) {
           wp_enqueue_script( 'udx-requires' );
           wp_enqueue_style( 'wp-elastic', $this->url . '/static/styles/wp-elastic.css', array(), $this->get( 'version' ), 'all' );
-          add_action( 'admin_print_footer_scripts', array( $this, 'admin_script_debug' ));
+          add_action( 'admin_print_footer_scripts', array( $this, 'admin_script_debug' ), 100 );
         }
 
         // Global Toolbar.
@@ -377,7 +388,7 @@ namespace wpElastic {
       static function admin_script_debug() {
 
         if( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && defined( 'WP_ELASTIC_BASEURL' ) ) {
-          echo '<script>"function" === typeof require ? require.set( "baseUrl", "' . WP_ELASTIC_BASEURL . '" ) : console.error( "wp-elastic", "udx.require.js not found" );</script>';
+          echo '<script>"function" === typeof require ? require.config({ "baseUrl": "' . WP_ELASTIC_BASEURL . '"}) : console.error( "wp-elastic", "udx.require.js not found" );</script>';
         }
 
       }

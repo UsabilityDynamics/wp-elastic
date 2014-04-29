@@ -4,24 +4,25 @@
   */
  ?>
 
-<section data-requires="wp-elastic.admin" class="wrap view-model">
+<section data-requires="wp-elastic.settings" class="wrap view-model">
+  <h2><?php _e( 'Settings', wp_elastic( 'domain' ) ); ?></h2>
   <h2 data-bind="text: title"></h2>
-
-  <div data-requires="wp-elastic.mapping" class="section wp-elastic-mapping view-model">
-    <h3>Mapping</h3>
-  </div>
-
-  <div data-requires="wp-elastic.settings" class="section wp-elastic-settings view-model">
-    <h3>Settings</h3>
-  </div>
-
+  <pre data-bind="text: settings"></pre>
 </section>
 
 <script id="wp-elastic-settings-script">
 
   // Declare dependencies.
   if( 'function' === typeof require ) {
-    require( [ 'udx.utility', 'knockout' ], bindView );
+    require.config({
+      deps: [ 'udx.utility', 'wp-elastic.api', 'knockout' ],
+      config: {
+        'wp-elastic.api': {
+          ajaxurl: ajaxurl || null
+        }
+      },
+      callback: viewCallback
+    });
   }
 
   /**
@@ -30,8 +31,8 @@
    * @param utility
    * @param ko
    */
-  function bindView( utility, ko ) {
-    console.debug( 'bindView', ko.version, utility.extend );
+  function viewCallback( utility, ko ) {
+    // console.debug( 'bindView', ko.version, utility.extend );
   }
 
 </script>
