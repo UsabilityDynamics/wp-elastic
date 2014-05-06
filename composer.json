@@ -47,8 +47,7 @@
     }
   },
   "autoload": {
-    "classmap": [ "lib" ],
-    "files":    [ "api/global.php" ]
+    "classmap": [ "lib" ]
   },
   "require": {
     "php": ">=5.3",
