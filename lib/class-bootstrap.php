@@ -5,14 +5,6 @@ namespace wpElastic {
 
   if( !class_exists( 'wpElastic\Bootstrap' ) ) {
 
-    if( !class_exists( 'wpElastic\Utility' ) ) {
-      require_once( 'class-utility.php' );
-    }
-
-    if( !class_exists( 'wpElastic\Settings' ) ) {
-      require_once( 'class-settings.php' );
-    }
-
     /**
      * @property string locale
      * @property string version
@@ -94,6 +86,15 @@ namespace wpElastic {
         $wp_elastic = self::$instance = &$this;
 
         try {
+
+
+          if( !class_exists( 'wpElastic\Utility' ) ) {
+            require_once( 'class-utility.php' );
+          }
+
+          if( !class_exists( 'wpElastic\Settings' ) ) {
+            require_once( 'class-settings.php' );
+          }
 
           // Set Essentials.
           $this->file         = wp_normalize_path( dirname( __DIR__ ) . '/wp-elastic.php' );
@@ -276,7 +277,7 @@ namespace wpElastic {
        */
       public function activate() {
 
-        $defaults = json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ));
+        // $defaults = json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ));
 
         // Set Defaults.
         if( !$this->get( '_installed' ) ) {
@@ -354,7 +355,7 @@ namespace wpElastic {
         global $wp_admin_bar;
 
         if( !$this->get( 'supports.toolbar.enabled' ) ) {
-          return;
+          // return;
         }
 
         $wp_admin_bar->add_menu( array(

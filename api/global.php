@@ -3,6 +3,8 @@
  * wp_elastic handler
  *
  * @param null $key
+ * @param null $default
+ *
  * @return null|\wpElastic\Bootstrap
  */
 function wp_elastic( $key = null, $default = null ) {

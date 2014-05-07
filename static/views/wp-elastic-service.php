@@ -3,8 +3,7 @@
   *
   */
  ?>
-
-<section data-requires="wp-elastic.settings" class="wrap view-model">
+<section data-requires="/modules/wp-elastic/static/scripts/wp-elastic.settings.js" class="wrap view-model">
   <h2><?php _e( 'wpElastic Settings', wp_elastic( 'domain' ) ); ?></h2>
   <h2 data-bind="text: title"></h2>
   <pre data-bind="text: settings"></pre>
@@ -15,7 +14,7 @@
   // Declare dependencies.
   if( 'function' === typeof require ) {
     require.config({
-      deps: [ 'udx.utility', 'wp-elastic.api', 'knockout' ],
+      deps: [ 'udx.utility', '/modules/wp-elastic/static/scripts/wp-elastic.api.js', 'knockout' ],
       config: {
         'wp-elastic.api': {
           ajaxurl: ajaxurl

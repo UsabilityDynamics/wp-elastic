@@ -11,4 +11,4 @@
 
 </div>
 
-<script>require.set( 'baseUrl', '/wp-content/plugins/wp-elastic/static/scripts/' );</script>
+<script>require.set( 'baseUrl', '/modules/wp-elastic/static/scripts/' );</script>
