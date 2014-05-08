@@ -2,9 +2,9 @@
 /**
  *
  */
-namespace wpElastic {
+namespace UsabilityDynamics\wpElastic {
 
-  if( !class_exists( 'wpElastic\Service' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Service' ) ) {
 
     class Service {
 

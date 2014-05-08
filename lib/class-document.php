@@ -1,7 +1,7 @@
 <?php
-namespace wpElastic {
+namespace UsabilityDynamics\wpElastic {
 
-  if( !class_exists( 'wpElastic\Document' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Document' ) ) {
 
     class Document {
 

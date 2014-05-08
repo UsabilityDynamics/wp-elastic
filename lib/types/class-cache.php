@@ -6,9 +6,9 @@
  * @package wp-elastic
  * @author potanin@UD
  */
-namespace wpElastic\Document {
+namespace UsabilityDynamics\wpElastic\Document {
 
-  if( !class_exists( 'wpElastic\Document\Cache' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Document\Cache' ) ) {
 
     class Cache extends Document {
 

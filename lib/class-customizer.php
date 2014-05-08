@@ -8,9 +8,9 @@
  * @version 0.1
  * @module UsabilityDynamics\AMD
  */
-namespace wpElastic {
+namespace UsabilityDynamics\wpElastic {
   
-  if( !class_exists( 'wpElastic\Customizer' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Customizer' ) ) {
   
     /**
      * Class Customize_Editor_Control

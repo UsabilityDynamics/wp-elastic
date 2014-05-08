@@ -13,7 +13,9 @@
  **/
 
 // Include global API methods.
-include_once( __DIR__ . '/api/global.php' );
+if( !function_exists( 'wp_elastic' ) ) {
+  include_once( __DIR__ . '/api/global.php' );
+}
 
 // Initialize.
-wp_elastic();
+return wp_elastic();

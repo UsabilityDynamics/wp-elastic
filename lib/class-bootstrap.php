@@ -1,7 +1,7 @@
 <?php
-namespace wpElastic {
+namespace UsabilityDynamics\wpElastic {
 
-  if( !class_exists( 'wpElastic\Bootstrap' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Bootstrap' ) ) {
 
     /**
      * @property string locale

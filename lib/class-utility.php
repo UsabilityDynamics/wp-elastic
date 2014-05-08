@@ -1,7 +1,7 @@
 <?php
-namespace wpElastic {
+namespace UsabilityDynamics\wpElastic {
 
-  if( !class_exists( 'wpElastic\Utility' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic' ) ) {
 
     class Utility extends \UsabilityDynamics\Utility {
 

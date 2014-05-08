@@ -6,9 +6,9 @@
  * @package wp-elastic
  * @author potanin@UD
  */
-namespace wpElastic\Document {
+namespace UsabilityDynamics\wpElastic\Document {
 
-  if( !class_exists( 'wpElastic\Document\User' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Document\User' ) ) {
 
     class User extends Document {
 

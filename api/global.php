@@ -17,7 +17,7 @@ function wp_elastic( $key = null, $default = null ) {
 
   if( !$wp_elastic && file_exists( dirname( __DIR__ ) . '/lib/class-bootstrap.php' ) ) {
     require_once( dirname( __DIR__ ) . '/lib/class-bootstrap.php' );
-    $wp_elastic = new wpElastic\Bootstrap();
+    $wp_elastic = new UsabilityDynamics\wpElastic\Bootstrap();
   }
 
   if( method_exists( $wp_elastic, 'get' ) ) {
