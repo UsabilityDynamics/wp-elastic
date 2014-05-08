@@ -47,16 +47,17 @@
     }
   },
   "autoload": {
-    "classmap": [ "lib" ]
+    "classmap": [ "lib" ],
+    "files":    [ "api/global.php" ]
   },
   "require": {
     "php": ">=5.3",
     "composer/installers": "~1.0",
+    "usabilitydynamics/lib-model": "master",
     "usabilitydynamics/lib-meta-box": "master",
     "usabilitydynamics/lib-settings": "master",
     "usabilitydynamics/lib-utility": "master",
     "usabilitydynamics/lib-api": "master",
-    "usabilitydynamics/lib-rpc": "master",
     "usabilitydynamics/lib-ui": "master"
   },
   "scripts": {

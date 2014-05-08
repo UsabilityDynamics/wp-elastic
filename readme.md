@@ -76,7 +76,7 @@ Non-blog specific on multisite.
 
 ## API Endpoints
 
-* /wp-admin/admin-ajax.php?action=/elastic/status
-* /wp-admin/admin-ajax.php?action=/elastic/settings
+* /wp-admin/admin-ajax.php?action=/wpe/status
+* /wp-admin/admin-ajax.php?action=/wpe/settings
 
 ## Building

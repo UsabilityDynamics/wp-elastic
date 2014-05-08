@@ -1,8 +1,6 @@
 <?php
 namespace wpElastic {
 
-  use \UsabilityDynamics\Settings;
-
   if( !class_exists( 'wpElastic\Bootstrap' ) ) {
 
     /**
@@ -87,7 +85,6 @@ namespace wpElastic {
 
         try {
 
-
           if( !class_exists( 'wpElastic\Utility' ) ) {
             require_once( 'class-utility.php' );
           }
@@ -122,49 +119,47 @@ namespace wpElastic {
 
         } catch( Exception $e ) {
           _doing_it_wrong( 'wpElastic\Bootstrap::__construct', $e->getMessage(), '1.0.1' );
-          return $this;
+          return new \WP_Error( $e->getMessage() );
         }
 
+        // Upgrade Control.
+        register_uninstall_hook( dirname( __DIR__ ) . '/wp-elastic.php',    array( 'wpElastic', 'uninstall' ) );
+        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'activate' ) );
+        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'deactivate' ) );
+
         // Core Actions.
-        add_action( 'admin_init',                 array( $this, 'admin_init' ), 20 );
-        add_action( 'admin_menu',                 array( $this, 'admin_menu' ), 20 );
-        add_action( 'network_admin_menu',         array( $this, 'admin_menu' ), 20 );
-        add_action( 'wp_before_admin_bar_render', array( $this, 'toolbar' ), 10 );
-        add_action( 'admin_enqueue_scripts',      array( $this, 'enqueue_scripts' ), 20 );
-        add_action( 'wp_enqueue_scripts',         array( $this, 'enqueue_scripts' ), 20 );
+        add_action( 'admin_init',                     array( $this, 'admin_init' ), 20 );
+        add_action( 'admin_menu',                     array( $this, 'admin_menu' ), 20 );
+        add_action( 'network_admin_menu',             array( $this, 'admin_menu' ), 20 );
+        add_action( 'wp_before_admin_bar_render',     array( $this, 'toolbar' ), 10 );
+        add_action( 'admin_enqueue_scripts',          array( $this, 'enqueue_scripts' ), 20 );
+        add_action( 'wp_enqueue_scripts',             array( $this, 'enqueue_scripts' ), 20 );
 
         // AJAX Actions.
-        add_action( 'wp_ajax_/elastic/status',    array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/elastic/mapping',   array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/elastic/settings',  array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/elastic/service',   array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/elastic/search',    array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/wp-elastic/status',     array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/wp-elastic/mapping',    array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/wp-elastic/settings',   array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/wp-elastic/service',    array( $this, 'api_router' ), 100 );
+        add_action( 'wp_ajax_/wp-elastic/search',     array( $this, 'api_router' ), 100 );
 
         // Customizer Actions.
-        add_action( 'customize_preview_init',     array( $this, 'customize_preview_init' ), 10 );
-
-        // Synchroniation Filters.
-        // add_action( 'deleted_user',               array( $this, 'deleted_user' ) );
-        // add_action( 'profile_update',             array( $this, 'user_update' ) );
-        // add_action( 'user_register',              array( $this, 'user_update' ) );
-
-        // add_action( 'added_user_meta',            array( $this, 'user_meta_change' ) );
-        // add_action( 'updated_user_meta',          array( $this, 'user_meta_change' ) );
-        // add_action( 'deleted_user_meta',          array( $this, 'user_meta_change' ) );
-
-        // add_action( 'save_post',                  array( $this, 'save_post' ) );
-        // add_action( 'delete_post',                array( $this, 'delete_post' ) );
-        // add_action( 'trash_post',                 array( $this, 'delete_post' ) );
-        // add_action( 'trash_post',                 array( $this, 'delete_post' ) );
-        // add_action( 'edit_term',                  array( $this, 'edit_term' ), 10, 3 );
+        add_action( 'customize_preview_init',         array( $this, 'customize_preview_init' ), 10 );
 
         // Utility Actions.
         add_filter( 'plugin_action_links_' . $this->basename, array( 'wpElastic\Bootstrap', 'action_links' ), -10 );
 
-        // Upgrade Control.
-        register_uninstall_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'uninstall' ) );
-        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( $this, 'activate' ) );
-        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( $this, 'deactivate' ) );
+        // Synchroniation Filters.
+        add_action( 'deleted_user',                  array( $this, 'deleted_user' ) );
+        add_action( 'profile_update',                array( $this, 'user_update' ) );
+        add_action( 'user_register',                 array( $this, 'user_update' ) );
+        add_action( 'added_user_meta',               array( $this, 'user_meta_change' ) );
+        add_action( 'updated_user_meta',             array( $this, 'user_meta_change' ) );
+        add_action( 'deleted_user_meta',             array( $this, 'user_meta_change' ) );
+        add_action( 'save_post',                     array( $this, 'save_post' ) );
+        add_action( 'delete_post',                   array( $this, 'delete_post' ) );
+        add_action( 'trash_post',                    array( $this, 'delete_post' ) );
+        add_action( 'trash_post',                    array( $this, 'delete_post' ) );
+        add_action( 'edit_term',                     array( $this, 'edit_term' ), 10, 3 );
 
       }
 
@@ -267,56 +262,6 @@ namespace wpElastic {
       public function customize_live_preview() {
         // wp_enqueue_script( 'wp-elastic.customizer', $this->url . 'static/scripts/wp-elastic.customizer.js', array( 'jquery', 'customize-preview' ), $this->get( 'version' ), true );
         // wp_localize_script( 'wp-elastic.customizer', 'wp_elastic_customizer', $this->get() );
-      }
-
-      /**
-       * Set Defaults on Activation.
-       *
-       * @author potanin@UD
-       * @method activate
-       */
-      public function activate() {
-
-        // $defaults = json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ));
-
-        // Set Defaults.
-        if( !$this->get( '_installed' ) ) {
-          $this->set( $defaults );
-        }
-
-        $this->set( '_installed', true );
-        $this->set( '_status', 'active' );
-
-        // Save Settings on activation.
-        $this->_settings->commit();
-
-      }
-
-      /**
-       * Set Inactive Statuf Flag on Deactivation.
-       *
-       * @author potanin@UD
-       * @method deactivate
-       */
-      public function deactivate() {
-
-        $this->set( '_status', 'inactive' );
-
-        $this->_settings->commit();
-
-      }
-
-      /**
-       * Uninstall Plugin.
-       *
-       * Must be static.
-       *
-       */
-      static public function uninstall() {
-
-        // $this->set( '_status', 'uninstalled' );
-        // $this->_settings->commit();
-
       }
 
       /**
@@ -462,7 +407,7 @@ namespace wpElastic {
         }
 
         // Frontend Scripts.
-        // if( current_filter() === 'wp_enqueue_scripts' && is_admin_bar_showing() ) {}
+        if( current_filter() === 'wp_enqueue_scripts' && is_admin_bar_showing() ) {}
 
       }
 
@@ -577,6 +522,60 @@ namespace wpElastic {
       }
 
       /**
+       * Set Defaults on Activation.
+       *
+       * @author potanin@UD
+       * @method activate
+       */
+      static public function activate() {
+
+        $instance = new wpElatic;
+
+        // $defaults = json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ));
+
+        // Set Defaults.
+        if( !$instance->get( '_installed' ) ) {
+          $instance->set( array() );
+        }
+
+        $instance->set( '_installed', true );
+        $instance->set( '_status', 'active' );
+
+        // Save Settings on activation.
+        $instance->_settings->commit();
+
+      }
+
+      /**
+       * Set Inactive Statuf Flag on Deactivation.
+       *
+       * @author potanin@UD
+       * @method deactivate
+       */
+      static public function deactivate() {
+
+        $instance = new wpElatic;
+
+        $instance->set( '_status', 'inactive' );
+
+        $instance->_settings->commit();
+
+      }
+
+      /**
+       * Uninstall Plugin.
+       *
+       * Must be static.
+       *
+       */
+      static public function uninstall() {
+
+        // $this->set( '_status', 'uninstalled' );
+        // $this->_settings->commit();
+
+      }
+
+      /**
        * Determine if instance already exists and Return Theme Instance
        *
        */
@@ -604,7 +603,8 @@ namespace wpElastic {
         return $this->_settings->get( $key, $default );
       }
 
-  }
+    }
+
   }
 
 }

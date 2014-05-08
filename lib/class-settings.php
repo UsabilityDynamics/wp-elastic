@@ -8,6 +8,7 @@ namespace wpElastic {
       function getMapping() {
 
       }
+
     }
 
   }
