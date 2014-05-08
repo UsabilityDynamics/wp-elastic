@@ -1,5 +1,9 @@
 wip
 
+## Usage
+* wp_elastic()->get() - Show all configuration settings.
+* wp_elastic()->get( 'version' ) - Show version number, or any setting key.
+
 ## Cache Groups
 * options
 * users

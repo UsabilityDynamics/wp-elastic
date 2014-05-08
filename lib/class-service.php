@@ -9,6 +9,16 @@ namespace UsabilityDynamics\wpElastic {
     class Service {
 
       /**
+       * Singleton Instance Reference.
+       *
+       * @public
+       * @static
+       * @property $instance
+       * @type {Object}
+       */
+      public static $queue = array();
+
+      /**
        * Make Request to Elasticsearch Service.
        *
        * @param array  $data
@@ -65,6 +75,27 @@ namespace UsabilityDynamics\wpElastic {
         // die( '<pre>' . print_r( json_encode( $result[ 'body' ] ) , true ) . '</pre>' );
         // die();
 
+      }
+
+      /**
+       *
+       * @method getQueue
+       * @return array
+       */
+      static public function getQueue() {
+        return (array) Service::$queue;
+      }
+
+      /**
+       * Add Object to Queue
+       *
+       * @method push
+       * @param array $data
+       * @return array
+       */
+      static public function push( $data = array() ) {
+        Service::$queue[] = (object) $data;
+        return Service::$queue;
       }
 
     }

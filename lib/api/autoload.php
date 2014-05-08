@@ -10,20 +10,26 @@
  * @param null $key
  * @param null $default
  *
+ * @author potanin@UD
+ * @method wp_elastic
  * @return null|\UsabilityDynamics\wpElastic\Bootstrap
  */
 function wp_elastic( $key = null, $default = null ) {
-  global $wp_elastic;
 
-  if( !$wp_elastic && file_exists( dirname( __DIR__ ) . '/lib/class-bootstrap.php' ) ) {
-    require_once( dirname( __DIR__ ) . '/lib/class-bootstrap.php' );
-    $wp_elastic = new UsabilityDynamics\wpElastic\Bootstrap();
+  // Should be autoloaded by composer autoload.php if used as a dependency of a site setup..
+  if( file_exists( dirname( __DIR__ ) . '/class-bootstrap.php' ) ) {
+    require_once( dirname( __DIR__ ) . '/class-bootstrap.php' );
   }
 
-  if( method_exists( $wp_elastic, 'get' ) ) {
-    return $key ? $wp_elastic->get( $key, $default ) : $wp_elastic;
+  // Either initializes wpElastic or gets the existing instance.
+  $_singleton = UsabilityDynamics\wpElastic\Bootstrap::get_instance();
+
+  // Just in case.
+  if( !method_exists( $_singleton, 'get' ) ) {
+    return new WP_Error( __( 'Unable to initialize wp-elastic plugin, get() method does not exist.' ) );
   }
 
-  return new WP_Error( __( 'Unable to initialize wp-elastic plugin.' ) );
+  // Return either a key lookup or singletons
+  return $key ? $_singleton->get( $key, $default ) : $_singleton;
 
 }

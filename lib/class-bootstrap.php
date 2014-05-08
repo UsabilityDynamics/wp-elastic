@@ -17,7 +17,7 @@ namespace UsabilityDynamics\wpElastic {
        * @property $instance
        * @type {Object}
        */
-      public static $instance = false;
+      public static $instance = null;
 
       /**
        * -
@@ -81,7 +81,8 @@ namespace UsabilityDynamics\wpElastic {
       function __construct() {
         global $wp_elastic;
 
-        $wp_elastic = self::$instance = &$this;
+        // Set singleton instance.
+        self::$instance = &$this;
 
         try {
 
@@ -97,13 +98,20 @@ namespace UsabilityDynamics\wpElastic {
           $this->file         = wp_normalize_path( dirname( __DIR__ ) . '/wp-elastic.php' );
           $this->basename     = plugin_basename( dirname( __DIR__ ) . '/wp-elastic.php' );
           $this->path         = plugin_dir_path( dirname( __DIR__ ) . '/wp-elastic.php' );
-          $this->url          = plugin_dir_url( dirname( __DIR__ ) . '/wp-elastic.php' );
+          $this->url          = plugins_url( '', dirname( __DIR__ ) );
           $this->relative     = str_replace( trailingslashit( WP_PLUGIN_DIR ), '', $this->file );
 
           // Initialize Settings and set defaults.
           $this->_settings = new Settings( array(
-            'store' => 'options',
+            'store' => 'site_meta',
             'key'   => 'wp-elastic'
+          ));
+
+          // Initialize Settings and set defaults.
+          $this->_transient = new Settings( array(
+            'store' => 'site_transient',
+            'expiration' => 60,
+            'key'   => 'wp-elastic',
           ));
 
           // Set Computed Options.
@@ -123,11 +131,12 @@ namespace UsabilityDynamics\wpElastic {
         }
 
         // Upgrade Control.
-        register_uninstall_hook( dirname( __DIR__ ) . '/wp-elastic.php',    array( 'wpElastic', 'uninstall' ) );
-        register_activation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'activate' ) );
-        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php', array( 'wpElastic', 'deactivate' ) );
+        register_uninstall_hook(    dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'uninstall' ) );
+        register_activation_hook(   dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'activate' ) );
+        register_deactivation_hook( dirname( __DIR__ ) . '/wp-elastic.php',   array( 'wpElastic', 'deactivate' ) );
 
         // Core Actions.
+        add_action( 'init',                           array( $this, 'init' ), 20 );
         add_action( 'admin_init',                     array( $this, 'admin_init' ), 20 );
         add_action( 'admin_menu',                     array( $this, 'admin_menu' ), 20 );
         add_action( 'network_admin_menu',             array( $this, 'admin_menu' ), 20 );
@@ -146,20 +155,38 @@ namespace UsabilityDynamics\wpElastic {
         add_action( 'customize_preview_init',         array( $this, 'customize_preview_init' ), 10 );
 
         // Utility Actions.
-        add_filter( 'plugin_action_links_' . $this->basename, array( 'wpElastic\Bootstrap', 'action_links' ), -10 );
+        add_filter( 'plugin_action_links_' . $this->basename, array( 'UsabilityDynamics\wpElastic\Bootstrap', 'action_links' ), -10 );
 
         // Synchroniation Filters.
-        add_action( 'deleted_user',                  array( $this, 'deleted_user' ) );
-        add_action( 'profile_update',                array( $this, 'user_update' ) );
-        add_action( 'user_register',                 array( $this, 'user_update' ) );
-        add_action( 'added_user_meta',               array( $this, 'user_meta_change' ) );
-        add_action( 'updated_user_meta',             array( $this, 'user_meta_change' ) );
-        add_action( 'deleted_user_meta',             array( $this, 'user_meta_change' ) );
-        add_action( 'save_post',                     array( $this, 'save_post' ) );
-        add_action( 'delete_post',                   array( $this, 'delete_post' ) );
-        add_action( 'trash_post',                    array( $this, 'delete_post' ) );
-        add_action( 'trash_post',                    array( $this, 'delete_post' ) );
-        add_action( 'edit_term',                     array( $this, 'edit_term' ), 10, 3 );
+        add_action( 'deleted_user',                   array( $this, 'deleted_user' ) );
+        add_action( 'profile_update',                 array( $this, 'user_update' ) );
+        add_action( 'user_register',                  array( $this, 'user_update' ) );
+        add_action( 'added_user_meta',                array( $this, 'user_meta_change' ) );
+        add_action( 'updated_user_meta',              array( $this, 'user_meta_change' ) );
+        add_action( 'deleted_user_meta',              array( $this, 'user_meta_change' ) );
+        add_action( 'save_post',                      array( $this, 'save_post' ) );
+        add_action( 'delete_post',                    array( $this, 'delete_post' ) );
+        add_action( 'trash_post',                     array( $this, 'delete_post' ) );
+        add_action( 'trash_post',                     array( $this, 'delete_post' ) );
+        add_action( 'edit_term',                      array( $this, 'edit_term' ), 10, 3 );
+
+      }
+
+      public function init() {
+
+        return;
+
+        $this->set( '__runtime', array(
+          'static' => 'asdf'
+        ));
+
+        Service::push( 'asdf' );
+        Service::push( array( 'sdaf' => 'asdfs' ) );
+        Service::push( 'asdf' );
+
+        die( '<pre>' . print_r( Service::getQueue(), true ) . '</pre>' );
+        // die( '<pre>' . print_r( $this->get(), true ) . '</pre>' );
+        // $this->push = Service;
 
       }
 
@@ -386,13 +413,13 @@ namespace UsabilityDynamics\wpElastic {
 
         // Register Libraies.
         wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
-        wp_register_script( 'wp-elastic.admin',     $this->url . '/static/scripts/wp-elastic.admin.js',     array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.mapping',   $this->url . '/static/scripts/wp-elastic.mapping.js',   array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.settings',  $this->url . '/static/scripts/wp-elastic.settings.js',  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.admin',     plugins_url( '/static/scripts/wp-elastic.admin.js', dirname( __DIR__ ) ),     array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.mapping',   plugins_url( '/static/scripts/wp-elastic.mapping.js', dirname( __DIR__ ) ),   array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.settings',  plugins_url( '/static/scripts/wp-elastic.settings.js', dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
 
         // Register Styles.
-        wp_register_style( 'wp-elastic.toolbar',    $this->url . '/static/styles/wp-elastic.toolbar.css',   array(), $this->get( 'version' ), 'all' );
-        wp_register_style( 'wp-elastic',            $this->url . '/static/styles/wp-elastic.css',           array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic.toolbar',    plugins_url( '/static/styles/wp-elastic.toolbar.css', dirname( __DIR__ ) ),   array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic',            plugins_url( '/static/styles/wp-elastic.css', dirname( __DIR__ ) ),           array(), $this->get( 'version' ), 'all' );
 
         // Include udx.requires on all wp-elastic pages.
         if( current_filter() === 'admin_enqueue_scripts' &&  in_array( get_current_screen()->id, $this->_pages ) ) {
@@ -529,7 +556,8 @@ namespace UsabilityDynamics\wpElastic {
        */
       static public function activate() {
 
-        $instance = new wpElatic;
+        // Initialize bootstrap.
+        $instance = new Bootstrap;
 
         // $defaults = json_decode( file_get_contents( $this->path . 'static/schemas/wp-elastic.defaults.json' ));
 
@@ -538,8 +566,9 @@ namespace UsabilityDynamics\wpElastic {
           $instance->set( array() );
         }
 
-        $instance->set( '_installed', true );
-        $instance->set( '_status', 'active' );
+        $instance->set( '_installed',   true );
+        $instance->set( '_status',      'active' );
+        $instance->set( '_activated',   time() );
 
         // Save Settings on activation.
         $instance->_settings->commit();
@@ -580,7 +609,7 @@ namespace UsabilityDynamics\wpElastic {
        *
        */
       public static function get_instance( $args = array() ) {
-        return null === self::$instance ? self::$instance = new self() : self::$instance;
+        return ( null === self::$instance ) ? new Bootstrap() : self::$instance;
       }
 
       /**
