@@ -1,7 +1,7 @@
 <?php
-namespace wpElastic {
+namespace UsabilityDynamics\wpElastic {
 
-  if( !class_exists( 'wpElastic\Importer' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Importer' ) ) {
 
     class Importer {
 
