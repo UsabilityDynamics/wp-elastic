@@ -10,7 +10,7 @@
  * @param null $key
  * @param null $default
  *
- * @return null|\wpElastic\Bootstrap
+ * @return null|\UsabilityDynamics\wpElastic\Bootstrap
  */
 function wp_elastic( $key = null, $default = null ) {
   global $wp_elastic;
