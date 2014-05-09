@@ -123,6 +123,16 @@ namespace UsabilityDynamics\wpElastic {
             'locale' => 'Text Domain'
           )));
 
+          // Define runtime directory paths.
+          $this->set( '__dir', array(
+            'cache' => dirname( __DIR__ ) . '/static/cache',
+            'schemas' => dirname( __DIR__ ) . '/static/schemas',
+            'scripts' => dirname( __DIR__ ) . '/static/scripts',
+            'styles' => dirname( __DIR__ ) . '/static/styles',
+            'views' => dirname( __DIR__ ) . '/static/views',
+            'types' => dirname( __DIR__ ) . '/static/types'
+          ));
+
           $this->checkDependencies();
 
         } catch( Exception $e ) {
@@ -174,11 +184,15 @@ namespace UsabilityDynamics\wpElastic {
 
       public function init() {
 
+        // self::activate();
+
         return;
 
-        $this->set( '__runtime', array(
-          'static' => 'asdf'
-        ));
+        if( is_dir( $this->get( '__dir.types' ) ) ) {
+          die('dir');
+        }
+        die( '<pre>' . print_r( $this->get( '__dir.types' ), true ) . '</pre>' );
+
 
         Service::push( 'asdf' );
         Service::push( array( 'sdaf' => 'asdfs' ) );
@@ -208,6 +222,8 @@ namespace UsabilityDynamics\wpElastic {
 
       /**
        * AJAX Handler.
+       *
+       * @todo Use lib-api or lib-rest to declare.
        *
        */
       public function api_router() {
@@ -569,6 +585,10 @@ namespace UsabilityDynamics\wpElastic {
         $instance->set( '_installed',   true );
         $instance->set( '_status',      'active' );
         $instance->set( '_activated',   time() );
+
+        if( !is_dir( dirname( __DIR__ ) . '/static/cache' ) ) {
+          wp_mkdir_p( dirname( __DIR__ ) . '/static/cache' );
+        }
 
         // Save Settings on activation.
         $instance->_settings->commit();

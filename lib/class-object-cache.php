@@ -73,7 +73,6 @@ class WP_Object_Cache {
    */
   var $blog_prefix;
 
-
   /**
    * Sets up object properties; PHP 5 style constructor
    *
