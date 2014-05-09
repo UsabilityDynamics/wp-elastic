@@ -127,12 +127,11 @@ namespace UsabilityDynamics\wpElastic {
 
           // Define runtime directory paths.
           $this->set( '__dir', array(
-            'cache' => dirname( __DIR__ ) . '/static/cache',
-            'schemas' => dirname( __DIR__ ) . '/static/schemas',
+            'cache'   => defined( 'WP_ELASTIC_CACHE_DIR' )  ? WP_ELASTIC_CACHE_DIR    : dirname( __DIR__ ) . '/static/cache',
+            'schemas' => defined( 'WP_ELASTIC_SCHEMAS_DIR' ) ? WP_ELASTIC_SCHEMAS_DIR : dirname( __DIR__ ) . '/static/schemas',
             'scripts' => dirname( __DIR__ ) . '/static/scripts',
-            'styles' => dirname( __DIR__ ) . '/static/styles',
-            'views' => dirname( __DIR__ ) . '/static/views',
-            'types' => dirname( __DIR__ ) . '/static/types'
+            'styles'  => dirname( __DIR__ ) . '/static/styles',
+            'views'   => dirname( __DIR__ ) . '/static/views'
           ));
 
           $this->checkDependencies();
@@ -240,11 +239,21 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function init() {
 
-        self::define( 'article',  file_get_contents( $this->get( '__dir.types' ) . '/article.json' ) );
-        self::define( 'log',      file_get_contents( $this->get( '__dir.types' ) . '/log.json' ) );
-        self::define( 'event',    file_get_contents( $this->get( '__dir.types' ) . '/event.json' ) );
-        self::define( 'artist',   file_get_contents( $this->get( '__dir.types' ) . '/artist.json' ) );
+        if ($handle = opendir($this->get( '__dir.schemas' ))) {
 
+          while (false !== ($entry = readdir($handle))) {
+
+            if( $entry === '.' || $entry === '..' ) {
+              continue;
+            }
+
+            self::define( str_replace( '.json', '', $entry ), file_get_contents( trailingslashit($this->get( '__dir.schemas' ) ) . $entry ) );
+
+          }
+
+          closedir($handle);
+
+        }
         // self::activate();
         // self::getSchema( 'sadf' );
 
