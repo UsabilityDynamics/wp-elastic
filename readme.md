@@ -7,6 +7,20 @@ wip
 * service.public_key - WP_ELASTIC_SECRET_KEY
 * service.index - WP_ELASTIC_PUBLIC_KEY
 * api.access_token - WP_ELASTIC_ACCESS_TOKEN
+* options.load_default_schemas - If default schemas should be loaded.
+
+## Constants
+
+* WP_ELASTIC_SERVICE_URL
+* WP_ELASTIC_SERVICE_INDEX
+* WP_ELASTIC_SECRET_KEY
+* WP_ELASTIC_PUBLIC_KEY
+* WP_ELASTIC_ACCESS_TOKEN
+* WP_ELASTIC_CACHE_DIR
+* WP_ELASTIC_SCHEMAS_DIR
+* WP_ELASTIC_SCRIPTS_DIR
+* WP_ELASTIC_STYLES_DIR
+* WP_ELASTIC_VIEWS_DIR
 
 ## Usage
 * wp_elastic()->get() - Show all configuration settings.

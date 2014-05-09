@@ -5,6 +5,11 @@ namespace UsabilityDynamics\wpElastic {
 
     class API {
 
+      public function __construct() {
+
+
+      }
+
       static public function postSettings( $data ) {
 
       }

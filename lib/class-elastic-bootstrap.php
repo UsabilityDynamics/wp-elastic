@@ -127,11 +127,11 @@ namespace UsabilityDynamics\wpElastic {
 
           // Define runtime directory paths.
           $this->set( '__dir', array(
-            'cache'   => defined( 'WP_ELASTIC_CACHE_DIR' )  ? WP_ELASTIC_CACHE_DIR    : dirname( __DIR__ ) . '/static/cache',
-            'schemas' => defined( 'WP_ELASTIC_SCHEMAS_DIR' ) ? WP_ELASTIC_SCHEMAS_DIR : dirname( __DIR__ ) . '/static/schemas',
-            'scripts' => dirname( __DIR__ ) . '/static/scripts',
-            'styles'  => dirname( __DIR__ ) . '/static/styles',
-            'views'   => dirname( __DIR__ ) . '/static/views'
+            'cache'   => defined( 'WP_ELASTIC_CACHE_DIR' )    ? WP_ELASTIC_CACHE_DIR    : dirname( __DIR__ ) . '/static/cache',
+            'schemas' => defined( 'WP_ELASTIC_SCHEMAS_DIR' )  ? WP_ELASTIC_SCHEMAS_DIR  : dirname( __DIR__ ) . '/static/schemas',
+            'scripts' => defined( 'WP_ELASTIC_SCRIPTS_DIR' )  ? WP_ELASTIC_SCRIPTS_DIR  : dirname( __DIR__ ) . '/static/scripts',
+            'styles'  => defined( 'WP_ELASTIC_STYLES_DIR' )   ? WP_ELASTIC_STYLES_DIR   : dirname( __DIR__ ) . '/static/styles',
+            'views'   => defined( 'WP_ELASTIC_VIEWS_DIR' )    ? WP_ELASTIC_VIEWS_DIR    : dirname( __DIR__ ) . '/static/views',
           ));
 
           // @note Temporary until options UI is ready.
@@ -170,28 +170,21 @@ namespace UsabilityDynamics\wpElastic {
         // Customizer Actions.
         add_action( 'customize_preview_init',         array( $this, 'customize_preview_init' ), 10 );
 
+        // Synchroniation Events.
+        add_action( 'deleted_user',                   array( 'UsabilityDynamics\wpElastic\Events', 'deleted_user' ) );
+        add_action( 'profile_update',                 array( 'UsabilityDynamics\wpElastic\Events', 'user_update' ) );
+        add_action( 'user_register',                  array( 'UsabilityDynamics\wpElastic\Events', 'user_update' ) );
+        add_action( 'added_user_meta',                array( 'UsabilityDynamics\wpElastic\Events', 'user_meta_change' ) );
+        add_action( 'updated_user_meta',              array( 'UsabilityDynamics\wpElastic\Events', 'user_meta_change' ) );
+        add_action( 'deleted_user_meta',              array( 'UsabilityDynamics\wpElastic\Events', 'user_meta_change' ) );
+        add_action( 'save_post',                      array( 'UsabilityDynamics\wpElastic\Events', 'save_post' ) );
+        add_action( 'delete_post',                    array( 'UsabilityDynamics\wpElastic\Events', 'delete_post' ) );
+        add_action( 'trash_post',                     array( 'UsabilityDynamics\wpElastic\Events', 'delete_post' ) );
+        add_action( 'trash_post',                     array( 'UsabilityDynamics\wpElastic\Events', 'delete_post' ) );
+        add_action( 'edit_term',                      array( 'UsabilityDynamics\wpElastic\Events', 'edit_term' ), 10, 3 );
+
         // Utility Actions.
         add_filter( 'plugin_action_links_' . $this->basename, array( 'UsabilityDynamics\wpElastic\Bootstrap', 'action_links' ), -10 );
-
-        // Synchroniation Filters.
-        add_action( 'deleted_user',                   array( $this, 'deleted_user' ) );
-        add_action( 'profile_update',                 array( $this, 'user_update' ) );
-        add_action( 'user_register',                  array( $this, 'user_update' ) );
-        add_action( 'added_user_meta',                array( $this, 'user_meta_change' ) );
-        add_action( 'updated_user_meta',              array( $this, 'user_meta_change' ) );
-        add_action( 'deleted_user_meta',              array( $this, 'user_meta_change' ) );
-        add_action( 'save_post',                      array( $this, 'save_post' ) );
-        add_action( 'delete_post',                    array( $this, 'delete_post' ) );
-        add_action( 'trash_post',                     array( $this, 'delete_post' ) );
-        add_action( 'trash_post',                     array( $this, 'delete_post' ) );
-        add_action( 'edit_term',                      array( $this, 'edit_term' ), 10, 3 );
-
-        // Constant Overrides.
-        $this->set( 'service.url',          defined( 'WP_ELASTIC_SERVICE_URL' )   ? WP_ELASTIC_SERVICE_URL    : $this->get( 'service.url' ) );
-        $this->set( 'service.index',        defined( 'WP_ELASTIC_SERVICE_INDEX' ) ? WP_ELASTIC_SERVICE_INDEX  : $this->get( 'service.index' ) );
-        $this->set( 'service.secret_key',   defined( 'WP_ELASTIC_SECRET_KEY' )    ? WP_ELASTIC_SECRET_KEY     : $this->get( 'service.secret_key' ) );
-        $this->set( 'service.public_key',   defined( 'WP_ELASTIC_PUBLIC_KEY' )    ? WP_ELASTIC_PUBLIC_KEY     : $this->get( 'service.public_key' ) );
-        $this->set( 'api.access_token',     defined( 'WP_ELASTIC_ACCESS_TOKEN' )  ? WP_ELASTIC_ACCESS_TOKEN   : $this->get( 'api.access_token' ) );
 
       }
 
@@ -202,6 +195,13 @@ namespace UsabilityDynamics\wpElastic {
        * @method init
        */
       public function init() {
+
+        // Constant Overrides.
+        $this->set( 'service.url',          defined( 'WP_ELASTIC_SERVICE_URL' )   ? WP_ELASTIC_SERVICE_URL    : $this->get( 'service.url' ) );
+        $this->set( 'service.index',        defined( 'WP_ELASTIC_SERVICE_INDEX' ) ? WP_ELASTIC_SERVICE_INDEX  : $this->get( 'service.index' ) );
+        $this->set( 'service.secret_key',   defined( 'WP_ELASTIC_SECRET_KEY' )    ? WP_ELASTIC_SECRET_KEY     : $this->get( 'service.secret_key' ) );
+        $this->set( 'service.public_key',   defined( 'WP_ELASTIC_PUBLIC_KEY' )    ? WP_ELASTIC_PUBLIC_KEY     : $this->get( 'service.public_key' ) );
+        $this->set( 'api.access_token',     defined( 'WP_ELASTIC_ACCESS_TOKEN' )  ? WP_ELASTIC_ACCESS_TOKEN   : $this->get( 'api.access_token' ) );
 
         if( $this->get( 'options.load_default_schemas' ) ) {
           Utility::load_default_schemas( $this->get( '__dir.schemas' ) );
@@ -446,13 +446,13 @@ namespace UsabilityDynamics\wpElastic {
 
         // Register Libraies.
         wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
-        wp_register_script( 'wp-elastic.admin',     plugins_url( '/static/scripts/wp-elastic.admin.js', dirname( __DIR__ ) ),     array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.mapping',   plugins_url( '/static/scripts/wp-elastic.mapping.js', dirname( __DIR__ ) ),   array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.settings',  plugins_url( '/static/scripts/wp-elastic.settings.js', dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.admin',     plugins_url( '/static/scripts/wp-elastic.admin.js',     dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.mapping',   plugins_url( '/static/scripts/wp-elastic.mapping.js',   dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.settings',  plugins_url( '/static/scripts/wp-elastic.settings.js',  dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
 
         // Register Styles.
-        wp_register_style( 'wp-elastic.toolbar',    plugins_url( '/static/styles/wp-elastic.toolbar.css', dirname( __DIR__ ) ),   array(), $this->get( 'version' ), 'all' );
-        wp_register_style( 'wp-elastic',            plugins_url( '/static/styles/wp-elastic.css', dirname( __DIR__ ) ),           array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic.toolbar',    plugins_url( '/static/styles/wp-elastic.toolbar.css',   dirname( __DIR__ ) ),  array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic',            plugins_url( '/static/styles/wp-elastic.css',           dirname( __DIR__ ) ),  array(), $this->get( 'version' ), 'all' );
 
         // Include udx.requires on all wp-elastic pages.
         if( current_filter() === 'admin_enqueue_scripts' &&  in_array( get_current_screen()->id, $this->_pages ) ) {
@@ -481,106 +481,6 @@ namespace UsabilityDynamics\wpElastic {
           echo '<script>"function" === typeof require ? require.config({ "baseUrl": "' . WP_ELASTIC_BASEURL . '"}) : console.error( "wp-elastic", "udx.require.js not found" );</script>';
         }
 
-      }
-
-      /**
-       * @param $id
-       * @param $reassign
-       */
-      public function deleted_user( $id, $reassign ) {
-
-        if( !Config::option( 'sync_users' ) ) {
-          return;
-        }
-
-      }
-
-      /**
-       * @param $user_id
-       */
-      public function user_update( $user_id ) {
-
-        if( !Config::option( 'sync_users' ) ) {
-          return;
-        }
-
-        if( $post == null || !in_array( $post->post_type, $this->get( 'types' ) ) ) {
-          return;
-        }
-
-      }
-
-      /**
-       * @param $meta_id
-       * @param $object_id
-       * @param $meta_key
-       * @param $_meta_value
-       */
-      public function user_meta_change( $meta_id, $object_id, $meta_key, $_meta_value ) {
-
-        if( !Config::option( 'sync_users' ) ) {
-          return;
-        }
-
-        if( doing_filter( 'added_user_meta' ) ) {}
-        if( doing_filter( 'updated_user_meta' ) ) {}
-        if( doing_filter( 'deleted_user_meta' ) ) {}
-
-      }
-
-      /**
-       * Index Terms
-       *
-       * @author potanin@UD
-       *
-       * @param $term_id
-       * @param $tt_id
-       * @param $taxonomy
-       */
-      public function edit_term( $term_id, $tt_id, $taxonomy ) {
-
-        return;
-
-      }
-
-      /**
-       * @param $post_id
-       */
-      public function save_post( $post_id ) {
-
-        $post = is_object( $post_id ) ? $post_id : get_post( $post_id );
-
-        return;
-
-        if( $post == null || !in_array( $post->post_type, $this->get( 'types' ) ) ) {
-          return;
-        }
-
-        if( $post->post_status == 'trash' ) {
-          Indexer::delete( $post );
-        }
-
-        if( $post->post_status == 'publish' ) {
-          Indexer::addOrUpdate( $post );
-        }
-
-      }
-
-      /**
-       * @param $post_id
-       */
-      public function delete_post( $post_id ) {
-        if( is_object( $post_id ) ) {
-          $post = $post_id;
-        } else {
-          $post = get_post( $post_id );
-        }
-
-        if( $post == null || !in_array( $post->post_type, $this->get( 'types' ) ) ) {
-          return;
-        }
-
-        Indexer::delete( $post );
       }
 
       /**
