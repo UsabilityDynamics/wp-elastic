@@ -1,5 +1,13 @@
 wip
 
+## Options
+
+* service.url - WP_ELASTIC_SERVICE_URL
+* service.secret_key - WP_ELASTIC_SERVICE_INDEX
+* service.public_key - WP_ELASTIC_SECRET_KEY
+* service.index - WP_ELASTIC_PUBLIC_KEY
+* api.access_token - WP_ELASTIC_ACCESS_TOKEN
+
 ## Usage
 * wp_elastic()->get() - Show all configuration settings.
 * wp_elastic()->get( 'version' ) - Show version number, or any setting key.

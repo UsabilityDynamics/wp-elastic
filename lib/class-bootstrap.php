@@ -1,6 +1,8 @@
 <?php
 namespace UsabilityDynamics\wpElastic {
 
+  use UsabilityDynamics;
+
   if( !class_exists( 'UsabilityDynamics\wpElastic\Bootstrap' ) ) {
 
     /**
@@ -180,19 +182,73 @@ namespace UsabilityDynamics\wpElastic {
         add_action( 'trash_post',                     array( $this, 'delete_post' ) );
         add_action( 'edit_term',                      array( $this, 'edit_term' ), 10, 3 );
 
+        // Constant Overrides.
+        $this->set( 'service.url',          defined( 'WP_ELASTIC_SERVICE_URL' )   ? WP_ELASTIC_SERVICE_URL    : $this->get( 'service.url' ) );
+        $this->set( 'service.index',        defined( 'WP_ELASTIC_SERVICE_INDEX' ) ? WP_ELASTIC_SERVICE_INDEX  : $this->get( 'service.index' ) );
+        $this->set( 'service.secret_key',   defined( 'WP_ELASTIC_SECRET_KEY' )    ? WP_ELASTIC_SECRET_KEY     : $this->get( 'service.secret_key' ) );
+        $this->set( 'service.public_key',   defined( 'WP_ELASTIC_PUBLIC_KEY' )    ? WP_ELASTIC_PUBLIC_KEY     : $this->get( 'service.public_key' ) );
+        $this->set( 'api.access_token',     defined( 'WP_ELASTIC_ACCESS_TOKEN' )  ? WP_ELASTIC_ACCESS_TOKEN   : $this->get( 'api.access_token' ) );
+
       }
 
+      /**
+       * Get Single Schema or all schemas
+       *
+       * @author potanin@UD
+       * @method getSchema
+       * @param $name
+       * @return array
+       */
+      public function getSchema( $name ) {
+        return UsabilityDynamics\Model::getSchema( $name );
+      }
+
+      /**
+       * Define Model.
+       *
+       *
+       * @method define
+       * @param string $model
+       * @param array  $args
+       * @return mixed
+       */
+      public function define( $model = '', $args = array() ) {
+
+        if( did_action( 'init' ) ) {
+          _doing_it_wrong( 'UsabilityDynamics\wpElastic\Bootstrap::define', __( 'Called too late.' ), '' );
+        }
+
+        if( is_string( $args ) ) {
+          $args = json_decode( $args );
+        }
+
+        $args = UsabilityDynamics\Utility::parse_args( $args, array(
+          'types' => array(),
+          'meta' => array(),
+          'taxonomies' => array()
+        ));
+
+        return UsabilityDynamics\Model::define( $args );
+
+      }
+
+      /**
+       * Intialize Models
+       *
+       * @author potanin@UD
+       * @method init
+       */
       public function init() {
 
+        self::define( 'article',  file_get_contents( $this->get( '__dir.types' ) . '/article.json' ) );
+        self::define( 'log',      file_get_contents( $this->get( '__dir.types' ) . '/log.json' ) );
+        self::define( 'event',    file_get_contents( $this->get( '__dir.types' ) . '/event.json' ) );
+        self::define( 'artist',   file_get_contents( $this->get( '__dir.types' ) . '/artist.json' ) );
+
         // self::activate();
+        // self::getSchema( 'sadf' );
 
         return;
-
-        if( is_dir( $this->get( '__dir.types' ) ) ) {
-          die('dir');
-        }
-        die( '<pre>' . print_r( $this->get( '__dir.types' ), true ) . '</pre>' );
-
 
         Service::push( 'asdf' );
         Service::push( array( 'sdaf' => 'asdfs' ) );
@@ -470,7 +526,7 @@ namespace UsabilityDynamics\wpElastic {
        * @param $id
        * @param $reassign
        */
-      static function deleted_user( $id, $reassign ) {
+      public function deleted_user( $id, $reassign ) {
 
         if( !Config::option( 'sync_users' ) ) {
           return;
@@ -481,13 +537,13 @@ namespace UsabilityDynamics\wpElastic {
       /**
        * @param $user_id
        */
-      static function user_update( $user_id ) {
+      public function user_update( $user_id ) {
 
         if( !Config::option( 'sync_users' ) ) {
           return;
         }
 
-        if( $post == null || !in_array( $post->post_type, Config::types() ) ) {
+        if( $post == null || !in_array( $post->post_type, $this->get( 'types' ) ) ) {
           return;
         }
 
@@ -499,7 +555,7 @@ namespace UsabilityDynamics\wpElastic {
        * @param $meta_key
        * @param $_meta_value
        */
-      static function user_meta_change( $meta_id, $object_id, $meta_key, $_meta_value ) {
+      public function user_meta_change( $meta_id, $object_id, $meta_key, $_meta_value ) {
 
         if( !Config::option( 'sync_users' ) ) {
           return;
@@ -520,7 +576,7 @@ namespace UsabilityDynamics\wpElastic {
        * @param $tt_id
        * @param $taxonomy
        */
-      static function edit_term( $term_id, $tt_id, $taxonomy ) {
+      public function edit_term( $term_id, $tt_id, $taxonomy ) {
 
         return;
 
@@ -529,11 +585,13 @@ namespace UsabilityDynamics\wpElastic {
       /**
        * @param $post_id
        */
-      static function save_post( $post_id ) {
+      public function save_post( $post_id ) {
 
         $post = is_object( $post_id ) ? $post_id : get_post( $post_id );
 
-        if( $post == null || !in_array( $post->post_type, Config::types() ) ) {
+        return;
+
+        if( $post == null || !in_array( $post->post_type, $this->get( 'types' ) ) ) {
           return;
         }
 
@@ -550,14 +608,14 @@ namespace UsabilityDynamics\wpElastic {
       /**
        * @param $post_id
        */
-      static function delete_post( $post_id ) {
+      public function delete_post( $post_id ) {
         if( is_object( $post_id ) ) {
           $post = $post_id;
         } else {
           $post = get_post( $post_id );
         }
 
-        if( $post == null || !in_array( $post->post_type, Config::types() ) ) {
+        if( $post == null || !in_array( $post->post_type, $this->get( 'types' ) ) ) {
           return;
         }
 
