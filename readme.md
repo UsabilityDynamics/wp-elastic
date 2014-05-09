@@ -10,6 +10,7 @@ wip
 * options.sync_users  - If user accounts should be synchronized.
 * options.public_types - List of publically searchable post types to synchronize.
 * options.private_types - List of non-public post types to synchronize.
+* options.enable.toolbar - Enable toolbar.
 * api.access_token - WP_ELASTIC_ACCESS_TOKEN
 * defaults.locale - Default locale to use for content.
 

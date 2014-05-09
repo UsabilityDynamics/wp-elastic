@@ -10,6 +10,7 @@ namespace UsabilityDynamics\wpElastic {
        *
        * @method load_schemas
        * @param null $path
+       *
        * @return array
        */
       static public function load_schemas( $path = null ) {
@@ -19,18 +20,20 @@ namespace UsabilityDynamics\wpElastic {
         foreach( (array) explode( ';', $path || '' ) as $_path ) {
 
           if( !$_path || !is_dir( $_path ) ) {
-            $_result[] = new \WP_Error( __( 'Unable to load defaults, directory does not exist.' ) );
+            $_result[ ] = new \WP_Error( __( 'Unable to load defaults, directory does not exist.' ) );
           }
 
-          if ($handle = opendir( $path )) {
+          if( $handle = opendir( $path ) ) {
 
-            while (false !== ($entry = readdir($handle))) {
+            while( false !== ( $entry = readdir( $handle ) ) ) {
 
               if( $entry === '.' || $entry === '..' ) {
                 continue;
               }
 
-              $_result[] = \UsabilityDynamics\wpElastic::define( str_replace( '.json', '', $entry ), file_get_contents( trailingslashit( $path  ) . $entry ) );
+              $_slug = self::create_slug( str_replace( array( '-', '.json' ), '', $entry ) );
+
+              $_result[ ] = \UsabilityDynamics\wpElastic::define( $_slug, file_get_contents( trailingslashit( $path ) . $entry ) );
 
             }
 
@@ -44,6 +47,13 @@ namespace UsabilityDynamics\wpElastic {
 
       }
 
+      /**
+       * Generate Valid Index Name
+       *
+       * @param $data
+       *
+       * @return string
+       */
       static public function indexName( $data ) {
         return self::create_slug( $data );
       }

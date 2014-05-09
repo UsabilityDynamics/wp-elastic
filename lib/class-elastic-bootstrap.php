@@ -181,7 +181,6 @@ namespace UsabilityDynamics\wpElastic {
         add_action( 'admin_enqueue_scripts',          array( $this, 'enqueue_scripts' ), 20 );
         add_action( 'wp_enqueue_scripts',             array( $this, 'enqueue_scripts' ), 20 );
         add_action( 'shutdown',                       array( $this, 'shutdown' ), 100 );
-        add_action( 'customize_preview_init',         array( $this, 'customize_preview_init' ), 10 );
 
         // Synchroniation Events.
         add_action( 'deleted_user',                   array( 'UsabilityDynamics\wpElastic\Events', 'deleted_user' ) );
@@ -215,7 +214,8 @@ namespace UsabilityDynamics\wpElastic {
         if( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
         }
 
-        // Service::flush();
+        // Service::process_queue();
+
       }
 
       /**
@@ -226,6 +226,10 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function init() {
 
+        if( $this->get( 'options.load_default_schemas' ) && $this->get( '__dir.schemas' ) ) {
+          Utility::load_schemas( $this->get( '__dir.schemas' ) );
+        }
+
         // Constant Overrides.
         $this->set( 'service.url',          defined( 'WP_ELASTIC_SERVICE_URL' )   ? WP_ELASTIC_SERVICE_URL    : $this->get( 'service.url' ) );
         $this->set( 'service.index',        defined( 'WP_ELASTIC_SERVICE_INDEX' ) ? WP_ELASTIC_SERVICE_INDEX  : $this->get( 'service.index' ) );
@@ -233,10 +237,6 @@ namespace UsabilityDynamics\wpElastic {
         $this->set( 'service.public_key',   defined( 'WP_ELASTIC_PUBLIC_KEY' )    ? WP_ELASTIC_PUBLIC_KEY     : $this->get( 'service.public_key' ) );
         $this->set( 'api.access_token',     defined( 'WP_ELASTIC_ACCESS_TOKEN' )  ? WP_ELASTIC_ACCESS_TOKEN   : $this->get( 'api.access_token' ) );
         $this->set( 'defaults.locale',      defined( 'WPLANG' )                   ? WPLANG                    : $this->get( 'defaults.locale' ) );
-
-        if( $this->get( 'options.load_default_schemas' ) && $this->get( '__dir.schemas' ) ) {
-          Utility::load_schemas( $this->get( '__dir.schemas' ) );
-        }
 
         // Get Rest Handler File.
         if( $this->get( '__file.rest' ) && is_file( $this->get( '__file.rest' ) ) ) {
@@ -285,84 +285,6 @@ namespace UsabilityDynamics\wpElastic {
       }
 
       /**
-       * AJAX Handler.
-       *
-       * @todo Use lib-api or lib-rest to declare.
-       *
-       */
-      public function api_router() {
-
-        $method   = $_SERVER[ 'REQUEST_METHOD' ];
-        $action   = $_GET[ 'action' ];
-        $payload  = isset( $_POST[ 'data' ] ) ? $_POST[ 'data' ] : array();
-
-        nocache_headers();
-
-        // Get Settings.
-        if( $method === 'GET'   && $action === '/wp-elastic/settings' ) {
-
-          return wp_send_json(array(
-            'ok' => true,
-            'message' => __( 'Returning wpElastic settings.', $this->get( 'locale' ) ),
-            'settings' => $this->get()
-          ));
-
-        }
-
-        // Update Settings.
-        if( $method === 'POST'  && $action === '/wp-elastic/settings' ) {
-
-          // Set Updated.
-          $this->set( $payload );
-
-          // Commit Settings.
-          $this->_settings->commit();
-
-          return wp_send_json(array(
-            'ok' => true,
-            'message' => __( 'Returning wpElastic settings.', $this->get( 'locale' ) ),
-            'settings' => $this->get()
-          ));
-
-        }
-
-        // Update Settings.
-        if( $method === 'DELETE'  && $action === '/wp-elastic/settings' ) {
-
-          // Commit Settings.
-          $this->_settings->flush();
-
-          return wp_send_json(array(
-            'ok' => true,
-            'message' => __( 'Successfully flushed wpElastic settings.', $this->get( 'locale' ) ),
-            'settings' => $this->get()
-          ));
-
-        }
-
-        // Get Status.
-        if( $method === 'GET'   && $action === '/wp-elastic/status' ) {
-
-          return wp_send_json(array(
-            'ok' => true,
-            'message' => __( 'The wpElastic service is enabled.', $this->get( 'locale' ) )
-          ));
-
-        }
-
-        // Get Service Information.
-        if( $method === 'GET'   && $action === '/wp-elastic/service' ) {
-
-          return wp_send_json(array(
-            'ok' => true,
-            'message' => __( 'The wpElastic service is enabled.', $this->get( 'locale' ) )
-          ));
-
-        }
-
-      }
-
-      /**
        * @param $links
        *
        * @return array
@@ -377,14 +299,6 @@ namespace UsabilityDynamics\wpElastic {
        *
        */
       public function admin_init() {
-        global $wp_plugin_paths;
-
-        // get_plugin_files( $this->relative );
-        // deactivate_plugins($file, true);
-
-        // wp_cache_add( 'key1', 'blah', 'balls' );
-        // global $wp_object_cache;
-        // die( '<pre>' . print_r( $wp_object_cache, true ) . '</pre>' );
 
       }
 
@@ -397,7 +311,7 @@ namespace UsabilityDynamics\wpElastic {
       public function toolbar() {
         global $wp_admin_bar;
 
-        if( !$this->get( 'supports.toolbar.enabled' ) ) {
+        if( !$this->get( 'options.enable.toolbar' ) ) {
           // return;
         }
 
