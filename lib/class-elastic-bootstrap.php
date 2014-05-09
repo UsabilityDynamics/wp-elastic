@@ -146,6 +146,7 @@ namespace UsabilityDynamics\wpElastic {
             'views'     => defined( 'WP_ELASTIC_VIEWS_DIR' )      ? WP_ELASTIC_VIEWS_DIR      : dirname( __DIR__ ) . '/static/views'
           ));
 
+          // Pluggable file Locations.
           $this->set( '__file', array(
             'rest'      => defined( 'WP_ELASTIC_REST_FILE' )      ? WP_ELASTIC_REST_FILE      : dirname( __DIR__ ) . '/lib/api/rest-actions.php',
             'template'  => defined( 'WP_ELASTIC_TEMPLATE_FILE' )  ? WP_ELASTIC_TEMPLATE_FILE  : dirname( __DIR__ ) . '/lib/api/template.php',
@@ -154,9 +155,11 @@ namespace UsabilityDynamics\wpElastic {
           // @note Temporary until options UI is ready.
           $this->set( 'options', array(
             'load_default_schemas'  => true,
-            'synchronized_types'    => array( 'post', 'page' )
+            'public_types'          => array( 'post', 'page' ),
+            'private_types'         => array()
           ));
 
+          // Verify Dependency Versions.
           $this->checkDependencies();
 
         } catch( Exception $e ) {
