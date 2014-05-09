@@ -25,6 +25,8 @@ wip
 * WP_ELASTIC_SCRIPTS_DIR
 * WP_ELASTIC_STYLES_DIR
 * WP_ELASTIC_VIEWS_DIR
+* WP_ELASTIC_REST_FILE
+* WP_ELASTIC_TEMPLATE_FILE
 
 ## Usage
 * wp_elastic()->get() - Show all configuration settings.
