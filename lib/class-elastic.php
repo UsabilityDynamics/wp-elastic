@@ -4,8 +4,6 @@
  */
 namespace UsabilityDynamics {
 
-  use UsabilityDynamics;
-
   if( !class_exists( 'UsabilityDynamics\wpElastic' ) ) {
 
     /**
@@ -24,7 +22,7 @@ namespace UsabilityDynamics {
        * @return array
        */
       public static function getSchema( $name ) {
-        return UsabilityDynamics\Model::getSchema( $name );
+        return \UsabilityDynamics\Model::getSchema( $name );
       }
 
       /**
@@ -51,7 +49,19 @@ namespace UsabilityDynamics {
           'taxonomies' => array()
         ));
 
-        return UsabilityDynamics\Model::define( $args );
+        return \UsabilityDynamics\Model::define( $args );
+
+      }
+
+      /**
+       * Update Available Schemas from api.wpElastic.io
+       *
+       * @method update
+       * @return bool
+       */
+      public static function update() {
+
+        return true;
 
       }
 

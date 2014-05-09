@@ -5,28 +5,42 @@ namespace UsabilityDynamics\wpElastic {
 
     class Utility extends \UsabilityDynamics\Utility {
 
-      static public function load_default_schemas( $path = null ) {
+      /**
+       * Load Schemas.
+       *
+       * @method load_schemas
+       * @param null $path
+       * @return array
+       */
+      static public function load_schemas( $path = null ) {
 
-        if( !$path || !is_dir( $path ) ) {
-          return new \WP_Error( __( 'Unable to load defaults, directory does not exist.' ) );
-        }
+        $_result = array();
 
-        if ($handle = opendir( $path )) {
+        foreach( (array) explode( ';', $path || '' ) as $_path ) {
 
-          while (false !== ($entry = readdir($handle))) {
+          if( !$_path || !is_dir( $_path ) ) {
+            $_result[] = new \WP_Error( __( 'Unable to load defaults, directory does not exist.' ) );
+          }
 
-            if( $entry === '.' || $entry === '..' ) {
-              continue;
+          if ($handle = opendir( $path )) {
+
+            while (false !== ($entry = readdir($handle))) {
+
+              if( $entry === '.' || $entry === '..' ) {
+                continue;
+              }
+
+              $_result[] = \UsabilityDynamics\wpElastic::define( str_replace( '.json', '', $entry ), file_get_contents( trailingslashit( $path  ) . $entry ) );
+
             }
 
-            \UsabilityDynamics\wpElastic::define( str_replace( '.json', '', $entry ), file_get_contents( trailingslashit( $path  ) . $entry ) );
+            closedir( $handle );
 
           }
 
-          closedir($handle);
-
         }
 
+        return $_result;
 
       }
 

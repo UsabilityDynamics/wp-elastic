@@ -6,8 +6,12 @@ wip
 * service.secret_key - WP_ELASTIC_SERVICE_INDEX
 * service.public_key - WP_ELASTIC_SECRET_KEY
 * service.index - WP_ELASTIC_PUBLIC_KEY
-* api.access_token - WP_ELASTIC_ACCESS_TOKEN
 * options.load_default_schemas - If default schemas should be loaded.
+* options.sync_users  - If user accounts should be synchronized.
+* options.public_types - List of publically searchable post types to synchronize.
+* options.private_types - List of non-public post types to synchronize.
+* api.access_token - WP_ELASTIC_ACCESS_TOKEN
+* defaults.locale - Default locale to use for content.
 
 ## Constants
 
@@ -102,7 +106,10 @@ Non-blog specific on multisite.
 
 ## API Endpoints
 
-* /wp-admin/admin-ajax.php?action=/wpe/status
-* /wp-admin/admin-ajax.php?action=/wpe/settings
+* /wp-admin/admin-ajax.php?action=/wp-elastic/service/status
+* /wp-admin/admin-ajax.php?action=/wp-elastic/service/meta
+* /wp-admin/admin-ajax.php?action=/wp-elastic/settings
+* /wp-admin/admin-ajax.php?action=/wp-elastic/search
+* /wp-admin/admin-ajax.php?action=/wp-elastic/document
 
 ## Building

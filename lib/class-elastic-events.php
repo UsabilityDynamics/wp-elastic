@@ -35,11 +35,13 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function user_update( $user_id ) {
 
-        if( !Config::option( 'sync_users' ) ) {
+        if( !wp_elastic()->get( 'options.sync_users' ) ) {
           return;
         }
 
-        if( $post == null || !in_array( $post->post_type, wp_elastic()->get( 'types' ) ) ) {
+        $_types = array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) );
+
+        if( $post == null || !in_array( $post->post_type, $_types ) ) {
           return;
         }
 
@@ -53,7 +55,7 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function user_meta_change( $meta_id, $object_id, $meta_key, $_meta_value ) {
 
-        if( !Config::option( 'sync_users' ) ) {
+        if( !wp_elastic()->get( 'options.sync_users' ) ) {
           return;
         }
 
@@ -83,11 +85,18 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function save_post( $post_id ) {
 
+        $_types = array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) );
+        // self::activate();
+        // self::getSchema( 'sadf' );
+
+        // Service::push( array( 'sdaf' => 'asdfs' ) );
+        // Service::push( 'asdf' );
+
         $post = is_object( $post_id ) ? $post_id : get_post( $post_id );
 
         return;
 
-        if( $post == null || !in_array( $post->post_type, wp_elastic()->get( 'types' ) ) ) {
+        if( $post == null || !in_array( $post->post_type, $_types ) ) {
           return;
         }
 
@@ -99,25 +108,29 @@ namespace UsabilityDynamics\wpElastic {
           Indexer::addOrUpdate( $post );
         }
 
+        Service::push( $post );
+
       }
 
       /**
        * @param $post_id
        */
       public function delete_post( $post_id ) {
+
+        $_types = array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) );
+
         if( is_object( $post_id ) ) {
           $post = $post_id;
         } else {
           $post = get_post( $post_id );
         }
 
-        if( $post == null || !in_array( $post->post_type, wp_elastic()->get( 'types' ) ) ) {
+        if( $post == null || !in_array( $post->post_type, $_types ) ) {
           return;
         }
 
         Indexer::delete( $post );
       }
-
 
     }
     

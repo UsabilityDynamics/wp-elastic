@@ -30,6 +30,14 @@ namespace UsabilityDynamics\wpElastic {
       public $basename = 'wp-elastic';
 
       /**
+       * RPC Slug
+       *
+       * @property $slug
+       * @type {String}
+       */
+      public $slug = 'wpe';
+
+      /**
        * -
        *
        * @property $basename
@@ -88,12 +96,16 @@ namespace UsabilityDynamics\wpElastic {
 
         try {
 
-          if( !class_exists( 'wpElastic\Utility' ) ) {
-            require_once( 'class-utility.php' );
+          if( !class_exists( 'UsabilityDynamics\wpElastic\Utility' ) ) {
+            require_once( 'class-elastic-utility.php' );
           }
 
-          if( !class_exists( 'wpElastic\Settings' ) ) {
-            require_once( 'class-settings.php' );
+          if( !class_exists( 'UsabilityDynamics\wpElastic\Settings' ) ) {
+            require_once( 'class-elastic-settings.php' );
+          }
+
+          if( !class_exists( 'UsabilityDynamics\wpElastic\Events' ) ) {
+            require_once( 'class-elastic-events.php' );
           }
 
           // Set Essentials.
@@ -112,7 +124,7 @@ namespace UsabilityDynamics\wpElastic {
           // Initialize Settings and set defaults.
           $this->_transient = new Settings( array(
             'store' => 'site_transient',
-            'expiration' => 60,
+            'expiration' => 600,
             'key'   => 'wp-elastic',
           ));
 
@@ -127,22 +139,28 @@ namespace UsabilityDynamics\wpElastic {
 
           // Define runtime directory paths.
           $this->set( '__dir', array(
-            'cache'   => defined( 'WP_ELASTIC_CACHE_DIR' )    ? WP_ELASTIC_CACHE_DIR    : dirname( __DIR__ ) . '/static/cache',
-            'schemas' => defined( 'WP_ELASTIC_SCHEMAS_DIR' )  ? WP_ELASTIC_SCHEMAS_DIR  : dirname( __DIR__ ) . '/static/schemas',
-            'scripts' => defined( 'WP_ELASTIC_SCRIPTS_DIR' )  ? WP_ELASTIC_SCRIPTS_DIR  : dirname( __DIR__ ) . '/static/scripts',
-            'styles'  => defined( 'WP_ELASTIC_STYLES_DIR' )   ? WP_ELASTIC_STYLES_DIR   : dirname( __DIR__ ) . '/static/styles',
-            'views'   => defined( 'WP_ELASTIC_VIEWS_DIR' )    ? WP_ELASTIC_VIEWS_DIR    : dirname( __DIR__ ) . '/static/views',
+            'cache'     => defined( 'WP_ELASTIC_CACHE_DIR' )      ? WP_ELASTIC_CACHE_DIR      : dirname( __DIR__ ) . '/static/cache',
+            'schemas'   => defined( 'WP_ELASTIC_SCHEMAS_DIR' )    ? WP_ELASTIC_SCHEMAS_DIR    : dirname( __DIR__ ) . '/static/schemas',
+            'scripts'   => defined( 'WP_ELASTIC_SCRIPTS_DIR' )    ? WP_ELASTIC_SCRIPTS_DIR    : dirname( __DIR__ ) . '/static/scripts',
+            'styles'    => defined( 'WP_ELASTIC_STYLES_DIR' )     ? WP_ELASTIC_STYLES_DIR     : dirname( __DIR__ ) . '/static/styles',
+            'views'     => defined( 'WP_ELASTIC_VIEWS_DIR' )      ? WP_ELASTIC_VIEWS_DIR      : dirname( __DIR__ ) . '/static/views'
+          ));
+
+          $this->set( '__file', array(
+            'rest'      => defined( 'WP_ELASTIC_REST_FILE' )      ? WP_ELASTIC_REST_FILE      : dirname( __DIR__ ) . '/lib/api/rest-actions.php',
+            'template'  => defined( 'WP_ELASTIC_TEMPLATE_FILE' )  ? WP_ELASTIC_TEMPLATE_FILE  : dirname( __DIR__ ) . '/lib/api/template.php',
           ));
 
           // @note Temporary until options UI is ready.
           $this->set( 'options', array(
-            'load_default_schemas' => true
+            'load_default_schemas'  => true,
+            'synchronized_types'    => array( 'post', 'page' )
           ));
 
           $this->checkDependencies();
 
         } catch( Exception $e ) {
-          _doing_it_wrong( 'wpElastic\Bootstrap::__construct', $e->getMessage(), '1.0.1' );
+          _doing_it_wrong( 'wpElastic\Bootstrap::__construct', $e->getMessage(), method_exists( $this, 'get' ) ? $this->get( 'version' ) : 'undefined' );
           return new \WP_Error( $e->getMessage() );
         }
 
@@ -159,15 +177,7 @@ namespace UsabilityDynamics\wpElastic {
         add_action( 'wp_before_admin_bar_render',     array( $this, 'toolbar' ), 10 );
         add_action( 'admin_enqueue_scripts',          array( $this, 'enqueue_scripts' ), 20 );
         add_action( 'wp_enqueue_scripts',             array( $this, 'enqueue_scripts' ), 20 );
-
-        // AJAX Actions.
-        add_action( 'wp_ajax_/wp-elastic/status',     array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/wp-elastic/mapping',    array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/wp-elastic/settings',   array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/wp-elastic/service',    array( $this, 'api_router' ), 100 );
-        add_action( 'wp_ajax_/wp-elastic/search',     array( $this, 'api_router' ), 100 );
-
-        // Customizer Actions.
+        add_action( 'shutdown',                       array( $this, 'shutdown' ), 100 );
         add_action( 'customize_preview_init',         array( $this, 'customize_preview_init' ), 10 );
 
         // Synchroniation Events.
@@ -189,6 +199,23 @@ namespace UsabilityDynamics\wpElastic {
       }
 
       /**
+       * Shutdown Handler
+       *
+       * @author potanin@UD
+       * @method shutdown
+       */
+      public function shutdown() {
+
+        if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+        }
+
+        if( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+        }
+
+        // Service::flush();
+      }
+
+      /**
        * Intialize Models
        *
        * @author potanin@UD
@@ -202,22 +229,41 @@ namespace UsabilityDynamics\wpElastic {
         $this->set( 'service.secret_key',   defined( 'WP_ELASTIC_SECRET_KEY' )    ? WP_ELASTIC_SECRET_KEY     : $this->get( 'service.secret_key' ) );
         $this->set( 'service.public_key',   defined( 'WP_ELASTIC_PUBLIC_KEY' )    ? WP_ELASTIC_PUBLIC_KEY     : $this->get( 'service.public_key' ) );
         $this->set( 'api.access_token',     defined( 'WP_ELASTIC_ACCESS_TOKEN' )  ? WP_ELASTIC_ACCESS_TOKEN   : $this->get( 'api.access_token' ) );
+        $this->set( 'defaults.locale',      defined( 'WPLANG' )                   ? WPLANG                    : $this->get( 'defaults.locale' ) );
 
-        if( $this->get( 'options.load_default_schemas' ) ) {
-          Utility::load_default_schemas( $this->get( '__dir.schemas' ) );
+        if( $this->get( 'options.load_default_schemas' ) && $this->get( '__dir.schemas' ) ) {
+          Utility::load_schemas( $this->get( '__dir.schemas' ) );
         }
-        // self::activate();
-        // self::getSchema( 'sadf' );
 
-        return;
+        // Get Rest Handler File.
+        if( $this->get( '__file.rest' ) && is_file( $this->get( '__file.rest' ) ) ) {
+          require_once( $this->get( '__file.rest' ) );
 
-        Service::push( 'asdf' );
-        Service::push( array( 'sdaf' => 'asdfs' ) );
-        Service::push( 'asdf' );
+          // Search API
+          API::define( '/v1/search', array(
+            'handler'     => 'wpElasticSearchAPI',
+            'namespace'   => 'wp-elastic',
+            'parameters'  => array( 'name', 'version' ),
+            'scopes'      => array( 'manage_options' )
+          ));
 
-        die( '<pre>' . print_r( Service::getQueue(), true ) . '</pre>' );
-        // die( '<pre>' . print_r( $this->get(), true ) . '</pre>' );
-        // $this->push = Service;
+          // Document API.
+          API::define( '/v1/document', array(
+            'handler'     => 'wpElasticDocumentAPI',
+            'namespace'   => 'wp-elastic',
+            'parameters'  => array( 'name', 'version' ),
+            'scopes'      => array( 'manage_options' )
+          ));
+
+          // Service API.
+          API::define( '/v1/service', array(
+            'handler'     => 'wpElasticServiceAPI',
+            'namespace'   => 'wp-elastic',
+            'parameters'  => array( 'name', 'version' ),
+            'scopes'      => array( 'manage_options' )
+          ));
+
+        }
 
       }
 
@@ -232,8 +278,6 @@ namespace UsabilityDynamics\wpElastic {
         if( version_compare( '0.2.1', Settings::$version ) >= 1 ) {
           throw new Exception( __( sprintf( 'Settings library version is invalid, wpElastic requires 0.2.1 or higher, while %s is available.', Settings::$version ),  $this->get( 'locale' ) ) );
         };
-
-        // wp_die( '<h1>' . __( 'wpElastic Critical Failure', $this->get( 'locale' ) ) . '</h1><p>' . $e->getMessage() . '</p>' );
 
       }
 
@@ -252,7 +296,7 @@ namespace UsabilityDynamics\wpElastic {
         nocache_headers();
 
         // Get Settings.
-        if( $method === 'GET'   && $action === '/elastic/settings' ) {
+        if( $method === 'GET'   && $action === '/wp-elastic/settings' ) {
 
           return wp_send_json(array(
             'ok' => true,
@@ -263,7 +307,7 @@ namespace UsabilityDynamics\wpElastic {
         }
 
         // Update Settings.
-        if( $method === 'POST'  && $action === '/elastic/settings' ) {
+        if( $method === 'POST'  && $action === '/wp-elastic/settings' ) {
 
           // Set Updated.
           $this->set( $payload );
@@ -280,7 +324,7 @@ namespace UsabilityDynamics\wpElastic {
         }
 
         // Update Settings.
-        if( $method === 'DELETE'  && $action === '/elastic/settings' ) {
+        if( $method === 'DELETE'  && $action === '/wp-elastic/settings' ) {
 
           // Commit Settings.
           $this->_settings->flush();
@@ -294,7 +338,7 @@ namespace UsabilityDynamics\wpElastic {
         }
 
         // Get Status.
-        if( $method === 'GET'   && $action === '/elastic/status' ) {
+        if( $method === 'GET'   && $action === '/wp-elastic/status' ) {
 
           return wp_send_json(array(
             'ok' => true,
@@ -304,7 +348,7 @@ namespace UsabilityDynamics\wpElastic {
         }
 
         // Get Service Information.
-        if( $method === 'GET'   && $action === '/elastic/service' ) {
+        if( $method === 'GET'   && $action === '/wp-elastic/service' ) {
 
           return wp_send_json(array(
             'ok' => true,
@@ -313,15 +357,6 @@ namespace UsabilityDynamics\wpElastic {
 
         }
 
-      }
-
-      /**
-       * Customizer.
-       *
-       */
-      public function customize_live_preview() {
-        // wp_enqueue_script( 'wp-elastic.customizer', $this->url . 'static/scripts/wp-elastic.customizer.js', array( 'jquery', 'customize-preview' ), $this->get( 'version' ), true );
-        // wp_localize_script( 'wp-elastic.customizer', 'wp_elastic_customizer', $this->get() );
       }
 
       /**
