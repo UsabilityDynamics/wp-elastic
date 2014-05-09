@@ -5,17 +5,29 @@ namespace UsabilityDynamics\wpElastic {
 
     class Document {
 
+      static $_type = 'post';
+
       function __construct() {
 
       }
 
-      static $version = '1.1.3';
-      static $client = 'UD_Cloud/1.1.3';
-      static $defaults = 'ud_cloud.config.json';
-      static $option = 'ud::cloud';
-      static $url = 'https://cloud.usabilitydynamics.com';
-      static $document_type = 'post';
-      static $api_version = 1;
+      static function normalize( $post ) {
+
+        $doc = array();
+
+        $doc[ 'event_date_time' ]         = date( 'c', strtotime( get_post_meta( $post->ID, 'hdp_event_date', 1 ) . ' ' . get_post_meta( $post->ID, 'hdp_event_time', 1 ) ) );
+        $doc[ 'event_date_human_format' ] = date( 'F j, Y', strtotime( get_post_meta( $post->ID, 'hdp_event_date', 1 ) . ' ' . get_post_meta( $post->ID, 'hdp_event_time', 1 ) ) );
+        $lat                              = get_post_meta( $post->ID, 'latitude', 1 );
+        $lon                              = get_post_meta( $post->ID, 'longitude', 1 );
+        $doc[ 'location' ]                = array(
+          'lat' => (float) ( !empty( $lat ) ? $lat : 0 ),
+          'lon' => (float) ( !empty( $lon ) ? $lon : 0 )
+        );
+        $doc[ 'raw' ]                     = get_event( $post->ID );
+        $doc[ 'permalink' ]               = get_permalink( $post->ID );
+        $doc[ 'image_url' ]               = flawless_image_link( $doc[ 'raw' ][ 'event_poster_id' ], 'events_flyer_thumb' );
+
+      }
 
       /**
        * Initializes Bridge by Adding Filters

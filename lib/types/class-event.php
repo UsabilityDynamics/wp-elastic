@@ -1,6 +1,6 @@
 <?php
 /**
- * Single Media Item.
+ * Single Blog / Site
  *
  * @version 2.4.0
  * @package wp-elastic
@@ -8,17 +8,16 @@
  */
 namespace UsabilityDynamics\wpElastic\Document {
 
-  if( !class_exists( 'UsabilityDynamics\wpElastic\Document\Media' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Document\Event' ) ) {
 
-    class Media extends Document {
+    class Event extends \UsabilityDynamics\wpElastic\Document {
 
       static function normalize() {
 
-        //** We can use get_events() for other types because it works well for them too. */
         $object = (object) get_event( $object->ID );
 
-        //** Date for photo gallery may not include the time. */
-        $time = ( $object->meta['hdp_event_date'] ? strtotime( $object->meta['hdp_event_date'] ) : 0 );
+        $time = ( $object->meta['hdp_event_date'] && $object->meta['hdp_event_time'] ? strtotime( $object->meta['hdp_event_date'] . ' ' . $object->meta['hdp_event_time'] ) : '' );
+
         $time = $time ? date( 'Y/m/d H:i:s', $time ) : '';
 
         /** @var $return array */
@@ -28,8 +27,10 @@ namespace UsabilityDynamics\wpElastic\Document {
           'type'      => $object->post_type,
           'summary'   => $object->post_excerpt,
           'time'      => $time,
-          'thumbnail' => $object->meta['hdp_poster_id'] ? UD_Functions::get_image_link( $object->meta['hdp_poster_id'], 'hd_small' ) : '',
+          'thumbnail' => $object->meta['_thumbnail_id'] ? UD_Functions::get_image_link( $object->meta['_thumbnail_id'], 'events_flyer_thumb' ) : '',
           'url'       => get_permalink( $object->ID ),
+          'rsvp'      => $object->meta['facebook_rsvp_url'],
+          'purchase'  => $object->meta['hdp_purchase_url'],
           'venue'     => array(),
           'artists'   => array(),
           '_meta'     => array(
@@ -41,7 +42,6 @@ namespace UsabilityDynamics\wpElastic\Document {
 
 
       }
-
       function __construct() {
 
       }

@@ -180,7 +180,7 @@ namespace UsabilityDynamics\wpElastic {
         add_action( 'admin_menu',                     array( $this, 'admin_menu' ), 20 );
         add_action( 'network_admin_menu',             array( $this, 'admin_menu' ), 20 );
         add_action( 'wp_before_admin_bar_render',     array( $this, 'toolbar' ), 10 );
-        add_action( 'admin_enqueue_scripts',          array( $this, 'enqueue_scripts' ), 20 );
+        add_action( 'admin_enqueue_scripts',          array( $this, 'enqueue_scripts' ), 200 );
         add_action( 'wp_enqueue_scripts',             array( $this, 'enqueue_scripts' ), 20 );
         add_action( 'shutdown',                       array( $this, 'shutdown' ), 100 );
 
@@ -397,7 +397,7 @@ namespace UsabilityDynamics\wpElastic {
       public function enqueue_scripts() {
 
         // Register Libraies.
-        wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), false );
+        wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.admin',     plugins_url( '/static/scripts/wp-elastic.admin.js',     dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.mapping',   plugins_url( '/static/scripts/wp-elastic.mapping.js',   dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
         wp_register_script( 'wp-elastic.settings',  plugins_url( '/static/scripts/wp-elastic.settings.js',  dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
@@ -406,7 +406,14 @@ namespace UsabilityDynamics\wpElastic {
         wp_register_style( 'wp-elastic.toolbar',    plugins_url( '/static/styles/wp-elastic.toolbar.css',   dirname( __DIR__ ) ),  array(), $this->get( 'version' ), 'all' );
         wp_register_style( 'wp-elastic',            plugins_url( '/static/styles/wp-elastic.css',           dirname( __DIR__ ) ),  array(), $this->get( 'version' ), 'all' );
 
-        // Include udx.requires on all wp-elastic pages.
+        // Enable for Post Editers.
+        if( current_filter() === 'admin_enqueue_scripts' && get_current_screen()->base === 'post' ) {
+          wp_enqueue_script( 'udx-requires' );
+          wp_enqueue_style( 'wp-elastic' );
+          add_action( 'admin_print_footer_scripts', array( $this, 'admin_script_debug' ), 100 );
+        }
+
+        // Enable on Admin Pages.
         if( current_filter() === 'admin_enqueue_scripts' &&  in_array( get_current_screen()->id, $this->_pages ) ) {
           wp_enqueue_script( 'udx-requires' );
           wp_enqueue_style( 'wp-elastic' );
