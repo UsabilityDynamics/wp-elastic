@@ -156,7 +156,9 @@ namespace UsabilityDynamics\wpElastic {
           $this->set( 'options', array(
             'load_default_schemas'  => true,
             'public_types'          => array( 'post', 'page' ),
-            'private_types'         => array()
+            'private_types'         => array( 'media' ),
+            'sync_users'            => true,  // array( 'subscriber', 'editor' )
+            'sync_terms'            => true   // array( 'category' )
           ));
 
           // Verify Dependency Versions.
@@ -189,7 +191,7 @@ namespace UsabilityDynamics\wpElastic {
         add_action( 'added_user_meta',                array( 'UsabilityDynamics\wpElastic\Events', 'user_meta_change' ) );
         add_action( 'updated_user_meta',              array( 'UsabilityDynamics\wpElastic\Events', 'user_meta_change' ) );
         add_action( 'deleted_user_meta',              array( 'UsabilityDynamics\wpElastic\Events', 'user_meta_change' ) );
-        add_action( 'save_post',                      array( 'UsabilityDynamics\wpElastic\Events', 'save_post' ) );
+        add_action( 'save_post',                      array( 'UsabilityDynamics\wpElastic\Events', 'save_post' ), 10, 2 );
         add_action( 'delete_post',                    array( 'UsabilityDynamics\wpElastic\Events', 'delete_post' ) );
         add_action( 'trash_post',                     array( 'UsabilityDynamics\wpElastic\Events', 'delete_post' ) );
         add_action( 'trash_post',                     array( 'UsabilityDynamics\wpElastic\Events', 'delete_post' ) );
@@ -208,13 +210,11 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function shutdown() {
 
-        if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-        }
+        if( defined( 'DOING_AJAX' ) && DOING_AJAX ) {}
 
-        if( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
-        }
+        if( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {}
 
-        // Service::process_queue();
+        Service::processQueue();
 
       }
 

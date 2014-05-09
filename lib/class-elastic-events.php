@@ -76,48 +76,57 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function edit_term( $term_id, $tt_id, $taxonomy ) {
 
+        if( !wp_elastic()->get( 'options.sync_terms' ) ) {
+          return;
+        }
+
         return;
 
       }
 
       /**
-       * @param $post_id
+       * Save Post
+       *
+       * @param      $post_id
+       * @param null $post
        */
-      public function save_post( $post_id ) {
+      public function save_post( $post_id, $post = null ) {
 
-        $_types = array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) );
-        // self::activate();
-        // self::getSchema( 'sadf' );
+        if( wp_is_post_revision( $post_id ) ) {
+          return;
+        }
 
-        // Service::push( array( 'sdaf' => 'asdfs' ) );
-        // Service::push( 'asdf' );
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+          return;
+        }
 
-        $post = is_object( $post_id ) ? $post_id : get_post( $post_id );
+        if ( ! current_user_can( 'edit_post', $post_id ) ){
+          return;
+        }
 
-        return;
-
-        if( $post == null || !in_array( $post->post_type, $_types ) ) {
+        if( $post == null || !in_array( $post->post_type, array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) ) ) ) {
           return;
         }
 
         if( $post->post_status == 'trash' ) {
-          Indexer::delete( $post );
+          Service::push( 'delete', $post );
         }
 
         if( $post->post_status == 'publish' ) {
-          Indexer::addOrUpdate( $post );
+          Service::push( 'index', $post );
         }
 
-        Service::push( $post );
+        if( $post->post_status == 'draft' ) {
+          Service::push( 'index', $post );
+        }
 
       }
 
       /**
+       *
        * @param $post_id
        */
       public function delete_post( $post_id ) {
-
-        $_types = array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) );
 
         if( is_object( $post_id ) ) {
           $post = $post_id;
@@ -125,11 +134,12 @@ namespace UsabilityDynamics\wpElastic {
           $post = get_post( $post_id );
         }
 
-        if( $post == null || !in_array( $post->post_type, $_types ) ) {
+        if( $post == null || !in_array( $post->post_type, array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) ) ) ) {
           return;
         }
 
-        Indexer::delete( $post );
+        Service::push( 'delete', $post );
+
       }
 
     }

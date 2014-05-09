@@ -27,6 +27,20 @@ namespace UsabilityDynamics\wpElastic {
       static public function request( $data = array(), $url = '_bulk' ) {
         global $wp_version;
 
+        if( empty( $data ) ) {
+          return;
+        }
+
+        $body = array();
+
+        foreach( (array) $data as $item ) {
+
+          if( $item->action === 'delete' ) {}
+          if( $item->action === 'udpate' ) {}
+          if( $item->action === 'index' ) {}
+
+        }
+
         $full_url = trailingslashit( wp_elastic( 'service.url' ) ) . trailingslashit( wp_elastic( 'service.index' ) ) . $url;
 
         if( !$data ) {
@@ -58,22 +72,19 @@ namespace UsabilityDynamics\wpElastic {
 
           $result = wp_remote_request( $full_url, array(
             'method'      => 'POST',
-            'timeout'     => 5,
+            'timeout'     => 10,
             'redirection' => 5,
             'user-agent'  => 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ),
             'blocking'    => true,
-            'headers'     => array(),
+            'headers'     => array(
+              'x-access-token' => wp_elastic( 'service.secret_key' )
+            ),
             'body'        => implode( "\n", $body ) . "\n"
           ));
 
         } catch( Exception $error ) {
           // echo $error->getMessage(), "\n";
         }
-
-
-        // die( '<pre>' . print_r( json_decode( $result[ 'body' ], true ) ) );
-        // die( '<pre>' . print_r( json_encode( $result[ 'body' ] ) , true ) . '</pre>' );
-        // die();
 
       }
 
@@ -82,6 +93,10 @@ namespace UsabilityDynamics\wpElastic {
        * @method getQueue
        * @return array
        */
+      static public function processQueue() {
+        return self::request( self::getQueue() );
+      }
+
       static public function getQueue() {
         return (array) Service::$queue;
       }
@@ -90,12 +105,21 @@ namespace UsabilityDynamics\wpElastic {
        * Add Object to Queue
        *
        * @method push
+       * @param       $action
        * @param array $data
+       *
        * @return array
        */
-      static public function push( $data = array() ) {
-        Service::$queue[] = (object) $data;
+      static public function push( $action, $data = array() ) {
+
+        Service::$queue[] = (object) array(
+          'action' => $action,
+          'time' => time(),
+          'data' => (object) $data
+        );
+
         return Service::$queue;
+
       }
 
     }
