@@ -134,6 +134,11 @@ namespace UsabilityDynamics\wpElastic {
             'views'   => dirname( __DIR__ ) . '/static/views'
           ));
 
+          // @note Temporary until options UI is ready.
+          $this->set( 'options', array(
+            'load_default_schemas' => true
+          ));
+
           $this->checkDependencies();
 
         } catch( Exception $e ) {
@@ -191,47 +196,6 @@ namespace UsabilityDynamics\wpElastic {
       }
 
       /**
-       * Get Single Schema or all schemas
-       *
-       * @author potanin@UD
-       * @method getSchema
-       * @param $name
-       * @return array
-       */
-      public function getSchema( $name ) {
-        return UsabilityDynamics\Model::getSchema( $name );
-      }
-
-      /**
-       * Define Model.
-       *
-       *
-       * @method define
-       * @param string $model
-       * @param array  $args
-       * @return mixed
-       */
-      public function define( $model = '', $args = array() ) {
-
-        if( did_action( 'init' ) ) {
-          _doing_it_wrong( 'UsabilityDynamics\wpElastic\Bootstrap::define', __( 'Called too late.' ), '' );
-        }
-
-        if( is_string( $args ) ) {
-          $args = json_decode( $args );
-        }
-
-        $args = UsabilityDynamics\Utility::parse_args( $args, array(
-          'types' => array(),
-          'meta' => array(),
-          'taxonomies' => array()
-        ));
-
-        return UsabilityDynamics\Model::define( $args );
-
-      }
-
-      /**
        * Intialize Models
        *
        * @author potanin@UD
@@ -239,20 +203,8 @@ namespace UsabilityDynamics\wpElastic {
        */
       public function init() {
 
-        if ($handle = opendir($this->get( '__dir.schemas' ))) {
-
-          while (false !== ($entry = readdir($handle))) {
-
-            if( $entry === '.' || $entry === '..' ) {
-              continue;
-            }
-
-            self::define( str_replace( '.json', '', $entry ), file_get_contents( trailingslashit($this->get( '__dir.schemas' ) ) . $entry ) );
-
-          }
-
-          closedir($handle);
-
+        if( $this->get( 'options.load_default_schemas' ) ) {
+          Utility::load_default_schemas( $this->get( '__dir.schemas' ) );
         }
         // self::activate();
         // self::getSchema( 'sadf' );
