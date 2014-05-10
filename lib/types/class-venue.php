@@ -8,9 +8,9 @@
  */
 namespace UsabilityDynamics\wpElastic\Document {
 
-  if( !class_exists( 'UsabilityDynamics\wpElastic\Document\Event' ) ) {
+  if( !class_exists( 'UsabilityDynamics\wpElastic\Document\Venue' ) ) {
 
-    class Event extends \UsabilityDynamics\wpElastic\Document {
+    class Venue extends \UsabilityDynamics\wpElastic\Document {
 
       static function normalize() {
 
