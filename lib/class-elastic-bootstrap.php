@@ -96,6 +96,11 @@ namespace UsabilityDynamics\wpElastic {
 
         try {
 
+          // Check if being called too early, such as during Unit Testing.
+          if( !function_exists( 'did_action' ) ) {
+            return $this;
+          }
+
           if( !class_exists( 'UsabilityDynamics\wpElastic\Utility' ) ) {
             require_once( 'class-elastic-utility.php' );
           }
