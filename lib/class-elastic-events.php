@@ -53,7 +53,7 @@ namespace UsabilityDynamics\wpElastic {
        * @param $meta_key
        * @param $_meta_value
        */
-      public function user_meta_change( $meta_id, $object_id, $meta_key, $_meta_value ) {
+      public function user_meta_change( $meta_id = null, $object_id = null, $meta_key = null, $_meta_value = null ) {
 
         if( !wp_elastic()->get( 'options.sync_users' ) ) {
           return;

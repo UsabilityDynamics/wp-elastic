@@ -23,7 +23,7 @@ namespace UsabilityDynamics\wpElastic {
             $_result[ ] = new \WP_Error( __( 'Unable to load defaults, directory does not exist.' ) );
           }
 
-          if( $handle = opendir( $path ) ) {
+          if( is_dir( $path ) && $handle = opendir( $path ) ) {
 
             while( false !== ( $entry = readdir( $handle ) ) ) {
 
