@@ -41,10 +41,6 @@ namespace UsabilityDynamics\wpElastic {
 
         $_types = array_merge( wp_elastic()->get( 'options.public_types' ), wp_elastic()->get( 'options.private_types' ) );
 
-        if( $post == null || !in_array( $post->post_type, $_types ) ) {
-          return;
-        }
-
       }
 
       /**
