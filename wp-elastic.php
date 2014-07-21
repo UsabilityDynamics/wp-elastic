@@ -12,10 +12,8 @@
  *
  **/
 
-// Include global API methods.
-if( !function_exists( 'wp_elastic' ) ) {
-  include_once( __DIR__ . '/lib/api/autoload.php' );
+// Include global API methods and Initialize module.
+if( require_once( __DIR__ . '/lib/api/autoload.php' ) && function_exists( 'wp_elastic' ) ) {
+  return wp_elastic();
 }
 
-// Initialize module.
-return wp_elastic();
