@@ -62,8 +62,7 @@
   },
   "scripts": {
     "pre-install-cmd": [
-      "npm install --silent",
-      "grunt clean:install"
+      "npm install --silent"
     ],
     "post-install-cmd": [
       "grunt install --force"

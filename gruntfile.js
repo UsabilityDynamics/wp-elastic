@@ -163,6 +163,9 @@ module.exports = function build( grunt ) {
   // Default Build Task.
   grunt.registerTask( 'default', [ 'markdown', 'uglify', 'less' ] );
 
+  // Install for development.
+  grunt.registerTask( 'install', [ 'shell:build' ] );
+
   // Build Distribution.
   grunt.registerTask( 'build', [ 'shell:build' ] );
 
