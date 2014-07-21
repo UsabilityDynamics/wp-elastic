@@ -2,7 +2,7 @@
 ##
 ##
 
-NAME 			   = wp-elastic
+NAME = wp-elastic
 
 default:
 	make install
@@ -17,6 +17,7 @@ build:
 # Install for Staging/Development
 install:
 	echo Installing $(NAME).
+	npm install --production
 	npm install --development
 	composer install --prefer-source --dev  --no-interaction
 	grunt install
