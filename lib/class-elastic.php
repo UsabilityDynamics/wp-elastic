@@ -40,7 +40,7 @@ namespace UsabilityDynamics {
         }
 
         if( is_string( $args ) ) {
-          $args = json_decode( $args );
+          $args = json_decode( $args, true );
         }
 
         $args = Utility::parse_args( $args, array(
