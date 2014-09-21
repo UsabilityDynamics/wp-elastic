@@ -14,6 +14,15 @@ build:
 	composer install --prefer-dist --no-dev --no-interaction
 	grunt build
 
+# Build for repository commit
+push:
+	echo Pushing $(NAME).
+	rm -rf composer.lock
+	composer update --prefer-dist --no-dev --no-interaction
+	git add . --all
+	git commit -m '[ci skip]'
+	git push
+
 # Install for Staging/Development
 install:
 	echo Installing $(NAME).

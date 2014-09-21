@@ -17,7 +17,6 @@ npm-debug.log
 *.sublime-workspace
 
 static/cache
-vendor
 *.seed
 *.log
 *.csv

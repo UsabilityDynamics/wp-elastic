@@ -12,6 +12,10 @@
  *
  **/
 
+if( file_exists( __DIR__ . '/vendor/libraries/autoload.php' ) ) {
+	include_once( __DIR__ . '/vendor/libraries/autoload.php' );
+}
+
 require_once( __DIR__ . '/lib/api/autoload.php' );
 
 // Include global API methods and Initialize module.
