@@ -1,7 +1,6 @@
 {
   "name": "UsabilityDynamics/wp-elastic",
   "description": "Improve WordPress search performance/accuracy and enable faceted search by leveraging an ElasticSearch server.",
-  "version": "2.4.0",
   "type": "wordpress-plugin",
   "keywords": [
     "elasticsearch",
@@ -53,20 +52,15 @@
   "require": {
     "php": ">=5.3",
     "composer/installers": "~1.0",
-    "usabilitydynamics/lib-model": "master",
-    "usabilitydynamics/lib-meta-box": "master",
-    "usabilitydynamics/lib-settings": "master",
-    "usabilitydynamics/lib-utility": "master",
-    "usabilitydynamics/lib-api": "master",
-    "usabilitydynamics/lib-ui": "master"
-  },
-  "scripts": {
-    "pre-install-cmd": [
-      "npm install --silent"
-    ],
-    "post-install-cmd": [
-      "grunt install --force"
-    ]
+    "usabilitydynamics/lib-settings": "~0.2",
+    "usabilitydynamics/lib-ui": "~0.2",
+    "usabilitydynamics/lib-utility": "~0.3",
+    "usabilitydynamics/lib-api": "~0.5",
+    "UsabilityDynamics/lib-carrington": "~1.2",
+    "usabilitydynamics/lib-utility": "~0.3",
+    "usabilitydynamics/lib-ui": "~0.2",
+    "UsabilityDynamics/lib-model": "~0.4",
+    "usabilitydynamics/wp-meta-box": "~4.3"
   },
   "license": "GPLv2",
   "minimum-stability": "dev"
