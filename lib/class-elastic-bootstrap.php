@@ -403,13 +403,14 @@ namespace UsabilityDynamics\wpElastic {
 
         // Register Libraies.
         wp_register_script( 'udx-requires',         '//cdn.udx.io/udx.requires.js', array(), $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.admin',     plugins_url( '/static/scripts/wp-elastic.admin.js',     dirname( __FILE__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.mapping',   plugins_url( '/static/scripts/wp-elastic.mapping.js',   dirname( __FILE__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
-        wp_register_script( 'wp-elastic.settings',  plugins_url( '/static/scripts/wp-elastic.settings.js',  dirname( __FILE__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
+
+        wp_register_script( 'wp-elastic.admin',     plugins_url( '/static/scripts/wp-elastic.admin.js',     dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.mapping',   plugins_url( '/static/scripts/wp-elastic.mapping.js',   dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
+        wp_register_script( 'wp-elastic.settings',  plugins_url( '/static/scripts/wp-elastic.settings.js',  dirname( __DIR__ ) ),  array( 'udx-requires' ),  $this->get( 'version' ), true );
 
         // Register Styles.
-        wp_register_style( 'wp-elastic.toolbar',    plugins_url( '/static/styles/wp-elastic.toolbar.css',   dirname( __FILE__ ) ),  array(), $this->get( 'version' ), 'all' );
-        wp_register_style( 'wp-elastic',            plugins_url( '/static/styles/wp-elastic.css',           dirname( __FILE__ ) ),  array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic.toolbar',    plugins_url( '/static/styles/wp-elastic.toolbar.css',   dirname( __DIR__ ) ),  array(), $this->get( 'version' ), 'all' );
+        wp_register_style( 'wp-elastic',            plugins_url( '/static/styles/wp-elastic.css',           dirname( __DIR__ ) ),  array(), $this->get( 'version' ), 'all' );
 
         // Enable for Post Editers.
         if( current_filter() === 'admin_enqueue_scripts' && get_current_screen()->base === 'post' ) {
