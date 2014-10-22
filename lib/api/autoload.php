@@ -29,11 +29,13 @@ if( !function_exists( 'wp_elastic' ) ) {
       require_once( dirname( __DIR__ ) . '/class-bootstrap.php' );
     }
 
-    // Either initializes wpElastic or gets the existing instance.
-    $_singleton = UsabilityDynamics\wpElastic\Bootstrap::get_instance();
+	  // Either initializes wpElastic or gets the existing instance.
+	  if( class_exists( 'UsabilityDynamics\wpElastic\Bootstrap' ) ) {
+		  $_singleton = UsabilityDynamics\wpElastic\Bootstrap::get_instance();
+	  }
 
     // Just in case.
-    if( !method_exists( $_singleton, 'get' ) ) {
+    if( !isset( $_singleton ) || isset( $_singleton ) && !method_exists( $_singleton, 'get' ) ) {
       return new WP_Error( __( 'Unable to initialize wp-elastic plugin, get() method does not exist.' ) );
     }
 
